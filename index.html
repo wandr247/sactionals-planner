@@ -1,0 +1,1418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sactionals Room Planner</title>
+<style>
+:root{--accent:#0e8f9c;--accent-d:#0a6f79;--bg:#f3f4f6;--panel:#fff;--line:#e5e7eb;--text:#111827;--muted:#6b7280;--danger:#dc2626;--warn:#d97706;--sel:#2563eb}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font:13.5px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--text);background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+button,select,input{font:inherit;color:inherit}
+#topbar{flex:none;height:52px;display:flex;align-items:center;gap:3px;padding:0 10px;background:#fff;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+#topbar::-webkit-scrollbar{display:none}
+.brand{font-weight:700;margin-right:6px;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.brand .logo{width:26px;height:26px;border-radius:7px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:13px}
+.dname{color:var(--muted);font-weight:500;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:4px}
+.tb{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:34px;min-width:34px;padding:0 8px;border:1px solid transparent;border-radius:8px;background:transparent;cursor:pointer;white-space:nowrap;flex:none}
+.tb:hover{background:#f3f4f6}
+.tb.on{background:#e0f2f4;border-color:#a5dbe0;color:var(--accent-d)}
+.tb:disabled{opacity:.35;cursor:default;background:transparent}
+.tb .lbl{font-size:12.5px}
+.sep{width:1px;height:24px;background:var(--line);margin:0 4px;flex:none}
+.ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#app{flex:1;display:flex;min-height:0}
+.panel{flex:none;width:288px;background:var(--panel);overflow-y:auto;border-right:1px solid var(--line)}
+#right{width:322px;border-right:0;border-left:1px solid var(--line)}
+.psec{padding:12px 14px;border-bottom:1px solid var(--line)}
+.psec h3{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sub{font-size:11.5px;color:var(--muted);margin:10px 0 6px;font-weight:600}
+.pal{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pal-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 4px 6px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;text-align:center}
+.pal-item:hover{border-color:#9fd3d9;background:#f6fbfc}
+.pal-item svg{width:64px;height:38px;pointer-events:none}
+.pal-item .nm{font-size:12px;font-weight:600;line-height:1.15}
+.pal-item .dm{font-size:11px;color:var(--muted)}
+.est{display:inline-block;font-size:9.5px;font-weight:700;color:#92400e;background:#fef3c7;border-radius:4px;padding:0 4px;margin-left:3px;vertical-align:1px}
+.setups{display:flex;flex-direction:column;gap:6px}
+.setup{display:flex;align-items:center;gap:10px;padding:6px 8px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;text-align:left;width:100%}
+.setup:hover{border-color:#9fd3d9;background:#f6fbfc}
+.setup svg{width:86px;height:52px;flex:none}
+.setup .nm{font-weight:600;font-size:12.5px}
+.setup .dm{font-size:11.5px;color:var(--muted)}
+.row{display:flex;align-items:center;gap:6px;margin:6px 0;flex-wrap:wrap}
+.row>label:first-child{min-width:62px;color:var(--muted);font-size:12.5px}
+.fi{display:inline-flex;align-items:center;gap:3px;color:var(--muted)}
+.fi input{width:52px;padding:5px 6px;border:1px solid var(--line);border-radius:7px;text-align:right;color:var(--text)}
+input[type=text],select{padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;min-width:0}
+input[type=text]{flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;font-size:12.5px}
+.btn:hover{background:#f9fafb}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:var(--danger)}
+.btn .ic{width:15px;height:15px}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:10px;padding:9px 10px;margin:8px 0;background:#fff}
+.card-h{display:flex;align-items:center;gap:7px;cursor:pointer}
+.card-h b{font-size:13.5px}
+.card-h .dims{margin-left:auto;color:var(--muted);font-size:12px}
+.dot{width:11px;height:11px;border-radius:3px;flex:none}
+.stats{font-size:12px;color:var(--muted);margin:2px 0 6px}
+table.cnt{width:100%;border-collapse:collapse;font-size:12.5px}
+table.cnt td{padding:2px 0;border-bottom:1px dashed #eef0f2}
+table.cnt td.q{text-align:right;width:40px;font-variant-numeric:tabular-nums}
+table.cnt td.p{text-align:right;width:80px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tot{display:flex;justify-content:space-between;font-weight:700;margin-top:6px}
+.total-card{border-color:#9fd3d9;background:#f4fbfc}
+.note{font-size:11.5px;color:var(--muted);margin-top:6px}
+body.hide-prices .price{display:none!important}
+.warn{font-size:12.5px;padding:6px 8px;border-radius:8px;margin:4px 0}
+.warn.bad{background:#fee2e2;color:#991b1b}
+.warn.out{background:#ffedd5;color:#9a3412}
+.warn.ok{background:#dcfce7;color:#166534}
+.chk{display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer}
+#stage{flex:1;position:relative;min-width:0;overflow:hidden}
+#plan{position:absolute;inset:0;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;background:#e9ecef;display:block}
+#plan.panning{cursor:grab}
+#hud{position:absolute;left:32px;bottom:10px;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:12px;color:var(--muted);pointer-events:none}
+#hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:12px;padding:14px 18px;text-align:center;color:var(--muted);pointer-events:none;max-width:330px;box-shadow:0 6px 20px rgba(0,0,0,.06)}
+#hint b{color:var(--text)}
+#toast{position:fixed;left:50%;top:62px;transform:translateX(-50%);background:#111827;color:#fff;padding:7px 12px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
+#toast.show{opacity:.93}
+#mobnav{display:none}
+#print-area{display:none}
+.kbd{font-size:11.5px;color:var(--muted);line-height:1.75}
+.kbd b{display:inline-block;min-width:18px;padding:0 4px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;background:#fafafa;color:var(--text);font-weight:600;text-align:center;font-size:11px}
+.selhead{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+.stepper{display:inline-flex;align-items:center;gap:6px}
+.stepper button{width:28px;height:28px;border:1px solid var(--line);border-radius:7px;background:#fff;cursor:pointer}
+@media (max-width:860px){
+  body{padding-bottom:calc(58px + env(safe-area-inset-bottom))}
+  .panel{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));width:auto!important;max-height:52vh;border:0!important;border-top:1px solid var(--line)!important;border-radius:16px 16px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.15);z-index:30;display:none}
+  .panel.open{display:block}
+  .psec{display:none;border-bottom:0}
+  .psec.show{display:block}
+  .pal{grid-template-columns:repeat(3,1fr)}
+  #mobnav{display:flex;position:fixed;left:0;right:0;bottom:0;height:calc(58px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#fff;border-top:1px solid var(--line);z-index:31}
+  #mobnav button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;color:var(--muted)}
+  #mobnav button.on{color:var(--accent-d);font-weight:600}
+  .tb .lbl,.dname,.brand span{display:none}
+  #hud{left:28px;bottom:8px;font-size:11px}
+}
+@media print{
+  @page{margin:12mm}
+  html,body{height:auto}
+  body{display:block;overflow:visible;background:#fff;padding:0}
+  body>*:not(#print-area){display:none!important}
+  #print-area{display:block!important;font:11px/1.35 system-ui,sans-serif;color:#000}
+  #print-area .plan{width:100%;height:auto;max-height:60vh}
+  #print-area h1{font-size:17px;margin:0 0 6px}
+  #print-area table{border-collapse:collapse;width:100%;margin-top:4px}
+  #print-area td,#print-area th{border:1px solid #bbb;padding:2px 6px;text-align:left}
+  #print-area .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  #print-area h2{font-size:13px;margin:6px 0 2px}
+}
+</style>
+</head>
+<body>
+<header id="topbar">
+  <div class="brand"><div class="logo">S</div><span>Sactionals Planner</span></div>
+  <div class="dname" id="dname"></div>
+  <button class="tb" data-act="undo" id="bUndo" title="Undo (Ctrl+Z)"><i data-ic="undo"></i></button>
+  <button class="tb" data-act="redo" id="bRedo" title="Redo (Ctrl+Shift+Z)"><i data-ic="redo"></i></button>
+  <span class="sep"></span>
+  <button class="tb selreq" data-act="rot" data-arg="-90" title="Rotate −90° (Shift+R)"><i data-ic="rotl"></i></button>
+  <button class="tb selreq" data-act="rot" data-arg="90" title="Rotate +90° (R)"><i data-ic="rotr"></i></button>
+  <button class="tb selreq" data-act="rot" data-arg="45" title="Rotate +45° (E)"><span class="lbl" style="display:inline">45°</span></button>
+  <button class="tb selreq" data-act="dup" title="Duplicate (Ctrl+D)"><i data-ic="dup"></i><span class="lbl">Duplicate</span></button>
+  <button class="tb selreq" data-act="del" title="Delete (Del)"><i data-ic="trash"></i></button>
+  <button class="tb selreq" data-act="group" title="Select whole sectional (G / double-click)"><i data-ic="group"></i><span class="lbl">Sectional</span></button>
+  <span class="sep"></span>
+  <button class="tb" data-act="tool" data-arg="select" id="bSelect" title="Select / move (drag empty floor to box-select)"><i data-ic="pointer"></i></button>
+  <button class="tb" data-act="tool" data-arg="pan" id="bPan" title="Pan mode (or hold Space / right-drag / two fingers)"><i data-ic="pan"></i></button>
+  <button class="tb" data-act="multi" id="bMulti" title="Multi-select: taps add to selection (or hold Shift)"><i data-ic="multi"></i></button>
+  <span class="sep"></span>
+  <button class="tb" data-act="zoomOut" title="Zoom out (−)"><i data-ic="zoomout"></i></button>
+  <button class="tb" data-act="fit" title="Fit room (F)"><i data-ic="fit"></i></button>
+  <button class="tb" data-act="zoomIn" title="Zoom in (+)"><i data-ic="zoomin"></i></button>
+  <span class="sep"></span>
+  <button class="tb" data-act="clearance" id="bClear" title="Show clearance distances between sectionals"><i data-ic="clear"></i><span class="lbl">Clearance</span></button>
+  <button class="tb" data-act="prices" id="bPrices" title="Show / hide prices"><i data-ic="dollar"></i><span class="lbl">Prices</span></button>
+  <span class="sep"></span>
+  <button class="tb" data-act="png" title="Export floor plan as PNG"><i data-ic="image"></i><span class="lbl">PNG</span></button>
+  <button class="tb" data-act="print" title="Print-friendly view"><i data-ic="print"></i></button>
+</header>
+<div id="app">
+  <aside id="left" class="panel">
+    <section class="psec" data-tab="designs">
+      <h3>Designs <span class="muted" id="saveState" style="text-transform:none;letter-spacing:0;font-weight:400"></span></h3>
+      <div class="row"><select id="designSel" style="flex:1"></select></div>
+      <div class="row"><input type="text" id="designName" placeholder="Design name" aria-label="Design name"></div>
+      <div class="btns">
+        <button class="btn" data-act="newDesign">New</button>
+        <button class="btn" data-act="dupDesign">Duplicate</button>
+        <button class="btn danger" data-act="delDesign">Delete</button>
+      </div>
+      <div class="btns" style="margin-top:6px">
+        <button class="btn" data-act="exportJSON">Export JSON</button>
+        <button class="btn" data-act="importJSON">Import JSON</button>
+        <button class="btn" data-act="png">Export PNG</button>
+        <button class="btn" data-act="print">Print</button>
+      </div>
+    </section>
+    <section class="psec" data-tab="room">
+      <h3>Room</h3>
+      <div class="row"><label>Width</label><span class="fi"><input type="number" id="roomWft" min="4" max="100" inputmode="numeric">ft</span><span class="fi"><input type="number" id="roomWin" min="0" max="11.5" step="0.5" inputmode="decimal">in</span></div>
+      <div class="row"><label>Length</label><span class="fi"><input type="number" id="roomHft" min="4" max="100" inputmode="numeric">ft</span><span class="fi"><input type="number" id="roomHin" min="0" max="11.5" step="0.5" inputmode="decimal">in</span></div>
+      <div class="row"><label>Grid snap</label><select id="gridSel"><option value="0">Off</option><option value="1">1″</option><option value="3">3″</option><option value="6">6″</option><option value="12">1 ft</option></select><span class="muted" style="font-size:12px">grid lines = 1 ft</span></div>
+    </section>
+    <section class="psec" data-tab="add">
+      <h3>Pieces <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:400">tap to add · drag onto floor</span></h3>
+      <div id="piecePal"></div>
+    </section>
+    <section class="psec" data-tab="setups">
+      <h3>Popular Setups</h3>
+      <div id="setupList"></div>
+    </section>
+    <section class="psec" data-tab="room">
+      <h3>Room objects</h3>
+      <div class="pal" id="objPal"></div>
+      <div class="note">Doors, TV stands and tables block furniture (overlaps are flagged). Rugs and windows don't. Toggle this per object.</div>
+    </section>
+  </aside>
+  <main id="stage">
+    <svg id="plan" xmlns="http://www.w3.org/2000/svg"><g id="world"></g><g id="overlay"></g></svg>
+    <div id="hud"></div>
+    <div id="hint"><b>Start your room</b><br>Add pieces from <b>Pieces</b>, or insert a <b>Popular Setup</b>. Drag pieces close to each other and they snap together. Touching pieces form one sectional.</div>
+  </main>
+  <aside id="right" class="panel">
+    <section class="psec" data-tab="edit" id="selPanel"></section>
+    <section class="psec" data-tab="summary" id="sumPanel"></section>
+    <section class="psec" data-tab="edit">
+      <h3>Shortcuts</h3>
+      <div class="kbd"><b>R</b>/<b>⇧R</b> rotate ±90° · <b>E</b>/<b>⇧E</b> ±45° · <b>T</b> 22.5° · <b>Del</b> delete · <b>Ctrl D</b> duplicate · <b>Ctrl Z</b>/<b>Ctrl ⇧Z</b> undo/redo · <b>Ctrl A</b> select all · <b>G</b> select sectional · arrows nudge 1″ (⇧ 6″) · hold <b>Alt</b> while dragging to skip snapping · <b>Space</b>+drag or right-drag to pan · wheel or pinch to zoom · <b>F</b> fit</div>
+    </section>
+  </aside>
+</div>
+<nav id="mobnav">
+  <button data-act="tab" data-arg="designs">☰<span>Designs</span></button>
+  <button data-act="tab" data-arg="room">▭<span>Room</span></button>
+  <button data-act="tab" data-arg="add">＋<span>Pieces</span></button>
+  <button data-act="tab" data-arg="setups">▦<span>Setups</span></button>
+  <button data-act="tab" data-arg="edit">✎<span>Edit</span></button>
+  <button data-act="tab" data-arg="summary">Σ<span>Summary</span></button>
+</nav>
+<div id="toast"></div>
+<div id="print-area"></div>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+<script>
+(function(){
+'use strict';
+/* =====================================================================
+   DIMENSIONS, ESTIMATES & SOURCES  (all lengths in inches)
+   Catalog = Lovesac's live configurator GraphQL data pulled 2026-10-05.
+   Anything the catalog leaves blank is filled below and flagged.
+   ===================================================================== */
+const CATALOG_DATE = '2026-10-05';
+const EST = {
+  SIDE_DEPTH: 6,          // SOURCED: Lovesac product page + spec sheet ("35" W x 28.5" T x 6" D"). Blank in the configurator catalog.
+  ROLL_ARM_DEPTH: 6,      // SOURCED: Lovesac spec sheet ("35" W x 26" T x 6" D").
+  SWEPT_ARM_W: 35,        // ESTIMATE: Lovesac publishes no Swept Arm dimensions; assumed = Standard Side length.
+  SWEPT_ARM_D: 6,         // ESTIMATE: assumed = Standard Side depth.
+  CHARGE_SIDE_D: 6,       // ESTIMATE: Charge (Angled) Side replaces a Standard/Angled Side insert; assumed same 35"x6" footprint.
+  WEDGE_BACK: 35,         // SOURCED: Wedge Seat 35" W.
+  WEDGE_DEPTH: 29,        // SOURCED: Wedge Seat 29" D.
+  WEDGE_FRONT: 10.98,     // ESTIMATE: derived. Symmetric trapezoid that "turns your couch 45°" (22.5° per side edge): 35 - 2*29*tan(22.5°).
+  RECLINER_W: 35,         // ESTIMATE: upright Reclining Seat footprint assumed = Seat (35" x 29"); recline extension is NOT modeled.
+  RECLINER_D: 29,         // ESTIMATE: see above.
+  STORAGE_W: 35, STORAGE_D: 29,   // SOURCED: Lovesac spec sheet (Storage Seat 35" W x 29" D).
+  ANYTABLE_W: 35, ANYTABLE_D: 17.5 // SOURCED: catalog (35" L x 17.5" W x 17.25" H).
+};
+// price = [Standard fill, Lovesoft fill] FRAME/INSERT prices from the catalog (covers not included)
+const PIECES = {
+  seat:          {name:'Seat', cat:'seat', w:35, h:29, abbr:'S', price:[550,750], sku:'GT4400', src:'35″ W × 29″ D (Lovesac). Back pillow on a 35″ edge.'},
+  deepSeat:      {name:'Deep Seat', cat:'seat', w:29, h:35, abbr:'DS', price:[550,750], sku:'GJ4274', src:'A Seat turned so its 29″ edge is the back ("rotate a Seat to make it Deep"). Comes with a Deep Back Pillow. Use Deep Sides (29″) on its back.'},
+  wedge:         {name:'Wedge Seat', cat:'seat', shape:'wedge', w:EST.WEDGE_BACK, h:EST.WEDGE_DEPTH, front:EST.WEDGE_FRONT, abbr:'W', price:[550,750], sku:'GW4618', est:true, src:'35″ W × 29″ D (Lovesac). Turns the couch 45°. Front width ≈11″ is an estimate. Snaps and auto-rotates against a neighbour.'},
+  storage:       {name:'Storage Seat', cat:'seat', w:EST.STORAGE_W, h:EST.STORAGE_D, abbr:'ST', price:[675,875], sku:'GG3208', src:'35″ W × 29″ D (Lovesac spec sheet).'},
+  deepStorage:   {name:'Deep Storage Seat', cat:'seat', w:EST.STORAGE_D, h:EST.STORAGE_W, abbr:'DST', price:[675,875], sku:'GG0961', src:'Storage Seat set deep (29″ edge is the back).'},
+  recliner:      {name:'Reclining Seat', cat:'seat', w:EST.RECLINER_W, h:EST.RECLINER_D, abbr:'R', price:[1675,1875], sku:'2RECSTND', est:true, src:'Footprint assumed = Seat (estimate). Recline extension not shown.'},
+  deepRecliner:  {name:'Deep Reclining Seat', cat:'seat', w:EST.RECLINER_D, h:EST.RECLINER_W, abbr:'DR', price:[1675,1875], sku:'2DRECSTND', est:true, src:'Footprint assumed = Deep Seat (estimate). Recline extension not shown.'},
+  side:          {name:'Standard Side', cat:'side', w:35, h:EST.SIDE_DEPTH, draw:'side', price:[200,200], sku:'GE6099', src:'35″ W × 6″ D (Lovesac). Fits a 35″ seat edge, or works as an arm.'},
+  deepSide:      {name:'Deep Side', cat:'side', w:29, h:EST.SIDE_DEPTH, draw:'side', price:[200,200], sku:'GD5777', src:'29″ W × 6″ D (Lovesac). Fits a 29″ seat edge.'},
+  angledSide:    {name:'Angled Side', cat:'side', w:35, h:EST.SIDE_DEPTH, draw:'angled', price:[200,200], sku:'GA7654', src:'35″ W × 6″ D (Lovesac).'},
+  deepAngledSide:{name:'Deep Angled Side', cat:'side', w:29, h:EST.SIDE_DEPTH, draw:'angled', price:[200,200], sku:'GA2939', src:'29″ W × 6″ D (Lovesac).'},
+  rollArm:       {name:'Roll Arm', cat:'side', w:35, h:EST.ROLL_ARM_DEPTH, draw:'roll', price:[200,200], sku:'GR7929', src:'35″ W × 6″ D (Lovesac). Arm use only.'},
+  sweptL:        {name:'Swept Arm (L)', cat:'side', w:EST.SWEPT_ARM_W, h:EST.SWEPT_ARM_D, draw:'swept', price:[200,200], sku:'GE1150', est:true, src:'Footprint estimated (35″ × 6″). Lovesac doesn\'t publish one.'},
+  sweptR:        {name:'Swept Arm (R)', cat:'side', w:EST.SWEPT_ARM_W, h:EST.SWEPT_ARM_D, draw:'sweptR', price:[200,200], sku:'GE1767', est:true, src:'Footprint estimated (35″ × 6″). Lovesac doesn\'t publish one.'},
+  chargeSide:    {name:'Charge Side', cat:'side', w:35, h:EST.CHARGE_SIDE_D, draw:'charge', price:[510,510], sku:'GE5473', est:true, src:'StealthTech Charge Side. Footprint assumed = Standard Side (estimate).'},
+  chargeAngled:  {name:'Charge Angled Side', cat:'side', w:35, h:EST.CHARGE_SIDE_D, draw:'chargeAngled', price:[510,510], sku:'GA7609', est:true, src:'StealthTech Charge Angled Side. Footprint assumed = Angled Side (estimate).'},
+  anyTable:      {name:'AnyTable', cat:'table', w:EST.ANYTABLE_W, h:EST.ANYTABLE_D, abbr:'AT', price:[995,995], sku:'NA1689', src:'35″ L × 17.5″ W × 17.25″ H (Lovesac).'},
+  anyTable2:     {name:'AnyTable · 2 Shelves', cat:'table', w:EST.ANYTABLE_W, h:EST.ANYTABLE_D, abbr:'AT', price:[1120,1120], sku:'ANYBL1', src:'35″ L × 17.5″ W (Lovesac).'},
+  anyTableD:     {name:'AnyTable · Shelf Drawer', cat:'table', w:EST.ANYTABLE_W, h:EST.ANYTABLE_D, abbr:'AT', price:[1120,1120], sku:'ANYBL2', src:'35″ L × 17.5″ W (Lovesac).'}
+};
+const ADDON = {name:'Deep Back Pillow (extra)', price:[125,225], sku:'GB6127'};
+const PALETTE = [
+  ['Seats', ['seat','deepSeat','wedge','storage','deepStorage','recliner','deepRecliner']],
+  ['Sides & arms', ['side','deepSide','angledSide','deepAngledSide','rollArm','sweptL','sweptR','chargeSide','chargeAngled']],
+  ['AnyTable', ['anyTable','anyTable2','anyTableD']]
+];
+const OBJ = {
+  door:   {label:'Door', w:36, h:36, blocking:true,  fill:'#f8fafc', stroke:'#64748b'},
+  window: {label:'Window', w:48, h:6, blocking:false, fill:'#dbeafe', stroke:'#3b82f6'},
+  rug:    {label:'Rug', w:96, h:60, blocking:false, fill:'#fdf4e7', stroke:'#d6a35c'},
+  tv:     {label:'TV stand', w:60, h:18, blocking:true, fill:'#4b5563', stroke:'#1f2937', text:'#fff'},
+  coffee: {label:'Coffee table', w:48, h:24, blocking:true, fill:'#e7d3b5', stroke:'#8a6a3f'},
+  other:  {label:'Furniture', w:36, h:36, blocking:true, fill:'#e5e7eb', stroke:'#6b7280'}
+};
+// Popular Setups from the catalog (name, group, piece counts as published by Lovesac)
+const SETUPS = [
+ {code:'4Seats5Sides_1937', name:'4 Seats + 5 Sides', group:'Most Popular', cat:{seat:4,side:5}},
+ {code:'6Seats8Sides(1Deep)_1937', name:'6 Seats + 8 Sides (1 Deep)', group:'Most Popular', cat:{seat:5,side:7,deepSide:1,deepSeat:1}},
+ {code:'5Seats5Sides(1Deep)_1937', name:'5 Seats + 5 Sides (1 Deep)', group:'Most Popular', cat:{seat:4,side:4,deepSide:1,deepSeat:1}},
+ {code:'7Seats8Sides_1937', name:'7 Seats + 8 Sides', group:'Most Popular', cat:{seat:3,side:8,deepSeat:4}},
+ {code:'6Seats6Sides_1937', name:'6 Seats + 6 Sides', group:'Most Popular', cat:{seat:6,side:6}},
+ {code:'6Seats6Sides(2 Deep)_1937', name:'6 Seats + 6 Sides (2 Deep)', group:'Most Popular', cat:{seat:4,side:4,deepSide:2,deepSeat:2}},
+ {code:'5Seats8Sides_1937', name:'5 Seats + 8 Sides', group:'Med/Large', cat:{seat:5,side:8}, addons:1},
+ {code:'4Seats6Sides_1937', name:'4 Seats + 6 Sides', group:'Med/Large', cat:{seat:4,side:6}, addons:1},
+ {code:'6Seats5Sides(1 Deep)_1937', name:'6 Seats + 5 Sides (1 Deep)', group:'Med/Large', cat:{seat:5,side:4,deepSide:1,deepSeat:1}},
+ {code:'5Seats8Sides(2 Deep)_1937', name:'5 Seats + 8 Sides (2 Deep)', group:'Med/Large', cat:{seat:3,side:6,deepSide:2,deepSeat:2}, addons:1},
+ {code:'8Seats10Sides_1937', name:'8 Seats + 10 Sides', group:'X-Large', cat:{seat:8,side:10}},
+ {code:'8Seats9Sides(2 Deep)_1937', name:'8 Seats + 9 Sides (2 Deep)', group:'X-Large', cat:{seat:6,side:7,deepSide:2,deepSeat:2}},
+ {code:'9Seats10Sides_1937', name:'9 Seats + 10 Sides', group:'X-Large', cat:{seat:9,side:10}},
+ {code:'10Seats12Sides_1937', name:'10 Seats + 12 Sides', group:'X-Large', cat:{seat:10,side:12}, addons:1},
+ {code:'4Seats4Sides_1937', name:'4 Seats + 4 Sides', group:'Small', cat:{seat:2,side:4,deepSeat:2}},
+ {code:'3Seats5Sides(1 Deep)_1937', name:'3 Seats + 5 Sides (1 Deep)', group:'Small', cat:{seat:2,side:4,deepSide:1,deepSeat:1}},
+ {code:'2Seats4Sides_1937', name:'2 Seats + 4 Sides', group:'Small', cat:{seat:2,side:4}}
+];
+const SNAP_PX = 14, TOUCH_TOL = 0.75, OVERLAP_EPS = 0.3, OUT_EPS = 0.25;
+const LS_KEY = 'sactionalsPlanner.v1';
+const DEG = Math.PI/180;
+
+/* ============================ utils ============================ */
+const $ = s => document.querySelector(s);
+const f = n => Math.round(n*100)/100;
+const r2 = n => Math.round(n*100)/100;
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = n => '$' + Math.round(n).toLocaleString('en-US');
+const normAng = a => r2(((a % 360) + 360) % 360);
+const normRad = a => { while (a > Math.PI) a -= 2*Math.PI; while (a < -Math.PI) a += 2*Math.PI; return a; };
+function fmtLen(v){
+  v = Math.round(v*2)/2; const neg = v < 0; v = Math.abs(v);
+  let ft = Math.floor(v/12), inch = Math.round((v - ft*12)*2)/2;
+  if (inch >= 12){ ft++; inch -= 12; }
+  const is = inch % 1 ? inch.toFixed(1) : String(inch);
+  return (neg?'−':'') + (ft ? `${ft}′ ${is}″` : `${is}″`);
+}
+const fmtIn = v => (Math.round(v*10)/10) + '″';
+const ptsStr = pts => pts.map(p => f(p[0]) + ',' + f(p[1])).join(' ');
+const clone = o => JSON.parse(JSON.stringify(o));
+function idNum(id){ return parseInt(String(id).slice(1), 10) || 0; }
+const ICONS = {
+  undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
+  redo:'<path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/>',
+  rotr:'<path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/>',
+  rotl:'<path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/>',
+  dup:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+  trash:'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>',
+  group:'<rect x="3" y="7" width="18" height="10" rx="2"/><path d="M9 7v10M15 7v10"/>',
+  pointer:'<path d="M5 3l6 17 2.5-7.5L21 10z"/>',
+  pan:'<path d="M5 9l-3 3 3 3"/><path d="M9 5l3-3 3 3"/><path d="M15 19l-3 3-3-3"/><path d="M19 9l3 3-3 3"/><path d="M2 12h20"/><path d="M12 2v20"/>',
+  multi:'<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/><path d="M13 7h4v4M7 13v4h4"/>',
+  zoomin:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v6M8 11h6"/>',
+  zoomout:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11h6"/>',
+  fit:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+  clear:'<path d="M3 12h18M3 8v8M21 8v8"/>',
+  dollar:'<path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/>',
+  print:'<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/>'
+};
+const icon = n => `<svg class="ic" viewBox="0 0 24 24">${ICONS[n]||''}</svg>`;
+
+/* ============================ geometry ============================ */
+function localPts(item){
+  if (item.kind) { const w=item.w, h=item.h; return [[-w/2,-h/2],[w/2,-h/2],[w/2,h/2],[-w/2,h/2]]; }
+  const d = PIECES[item.type];
+  if (d.shape === 'wedge') { const w=d.w, h=d.h, fr=d.front; return [[-w/2,-h/2],[w/2,-h/2],[fr/2,h/2],[-fr/2,h/2]]; }
+  const w=d.w, h=d.h; return [[-w/2,-h/2],[w/2,-h/2],[w/2,h/2],[-w/2,h/2]];
+}
+function polyOf(item){
+  const c = Math.cos(item.r*DEG), s = Math.sin(item.r*DEG);
+  return localPts(item).map(([x,y]) => [item.x + x*c - y*s, item.y + x*s + y*c]);
+}
+function rotatePts(P, cx, cy, deg){ const c=Math.cos(deg*DEG), s=Math.sin(deg*DEG); return P.map(([x,y]) => { const dx=x-cx, dy=y-cy; return [cx+dx*c-dy*s, cy+dx*s+dy*c]; }); }
+const translatePts = (P,dx,dy) => P.map(([x,y]) => [x+dx, y+dy]);
+function bboxOf(P){ let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity; for(const [x,y] of P){ if(x<x0)x0=x; if(y<y0)y0=y; if(x>x1)x1=x; if(y>y1)y1=y; } return {x0,y0,x1,y1}; }
+function bboxOfPolys(Ps){ let b={x0:Infinity,y0:Infinity,x1:-Infinity,y1:-Infinity}; for(const P of Ps){ const q=bboxOf(P); b.x0=Math.min(b.x0,q.x0); b.y0=Math.min(b.y0,q.y0); b.x1=Math.max(b.x1,q.x1); b.y1=Math.max(b.y1,q.y1);} return b; }
+const boxNear = (a,b,t) => !(a.x0 > b.x1+t || a.x1 < b.x0-t || a.y0 > b.y1+t || a.y1 < b.y0-t);
+function projRange(P,nx,ny){ let mn=Infinity, mx=-Infinity; for(const [x,y] of P){ const v=x*nx+y*ny; if(v<mn)mn=v; if(v>mx)mx=v; } return [mn,mx]; }
+// SAT: >0 = penetration depth (overlap), <=0 = separated
+function overlapDepth(A,B){
+  let min = Infinity;
+  for (const P of [A,B]) for (let i=0;i<P.length;i++){
+    const a=P[i], b=P[(i+1)%P.length]; let nx=b[1]-a[1], ny=a[0]-b[0]; const L=Math.hypot(nx,ny); if (L<1e-9) continue; nx/=L; ny/=L;
+    const [a0,a1]=projRange(A,nx,ny), [b0,b1]=projRange(B,nx,ny);
+    const o = Math.min(a1,b1) - Math.max(a0,b0); if (o < min) min = o; if (min <= 0) return min;
+  }
+  return min;
+}
+function segClosest(p,a,b){ const abx=b[0]-a[0], aby=b[1]-a[1]; const L=abx*abx+aby*aby||1; const t=clamp(((p[0]-a[0])*abx+(p[1]-a[1])*aby)/L,0,1); return [a[0]+abx*t, a[1]+aby*t]; }
+function polyDist(A,B){
+  let best = {d:Infinity, a:A[0], b:B[0]};
+  for (const p of A) for (let i=0;i<B.length;i++){ const q=segClosest(p,B[i],B[(i+1)%B.length]); const d=Math.hypot(p[0]-q[0],p[1]-q[1]); if (d<best.d) best={d,a:p,b:q}; }
+  for (const p of B) for (let i=0;i<A.length;i++){ const q=segClosest(p,A[i],A[(i+1)%A.length]); const d=Math.hypot(p[0]-q[0],p[1]-q[1]); if (d<best.d) best={d,a:q,b:p}; }
+  if (overlapDepth(A,B) > 0) best.d = 0;
+  return best;
+}
+const isBlocking = it => !it.kind || !!it.blocking;
+const pairCollides = (a,b) => (!a.kind && !b.kind) || (!a.kind && b.kind && b.blocking) || (a.kind && a.blocking && !b.kind);
+
+/* ===================== Popular Setup layouts =====================
+   Lovesac's catalog only gives piece COUNTS + a thumbnail. Positions below
+   were laid out by hand from those thumbnails using real dimensions.
+   Counts match the catalog exactly; geometry is an approximation.
+   [type, x, y, rot] with x,y = top-left of the rotated footprint.      */
+const S=(x,y)=>['seat',x,y,0], SR=(x,y)=>['seat',x,y,90], SL=(x,y)=>['seat',x,y,270],
+      D=(x,y)=>['deepSeat',x,y,0], DL=(x,y)=>['deepSeat',x,y,270], DW=(x,y)=>['deepSeat',x,y,90],
+      H=(x,y)=>['side',x,y,0], V=(x,y)=>['side',x,y,90], h=(x,y)=>['deepSide',x,y,0], v=(x,y)=>['deepSide',x,y,90];
+function L(spec){
+  return spec.map(([t,x,y,r]) => { const d=PIECES[t]; const sw=(r%180===0)?d.w:d.h, sh=(r%180===0)?d.h:d.w; return {type:t, x:x+sw/2, y:y+sh/2, r}; });
+}
+function transformPcs(pcs, o){
+  const c=Math.cos((o.rot||0)*DEG), s=Math.sin((o.rot||0)*DEG);
+  return pcs.map(p => { let x=p.x, y=p.y, r=p.r; if (o.mirror){ x=-x; r=-r; } const nx=x*c-y*s+(o.dx||0), ny=x*s+y*c+(o.dy||0); return {...p, x:nx, y:ny, r:normAng(r+(o.rot||0))}; });
+}
+const bboxPcs = pcs => bboxOfPolys(pcs.map(polyOf));
+function anyOverlap(A,B){ const PA=A.map(polyOf), PB=B.map(polyOf); for(const a of PA) for(const b of PB) if (overlapDepth(a,b) > 0.01) return true; return false; }
+function normalizePcs(pcs){ const b=bboxPcs(pcs); return pcs.map(p => ({...p, x:r2(p.x-b.x0), y:r2(p.y-b.y0)})); }
+function joinWings(w1, w2){
+  let A = transformPcs(L(w1), {rot:45});
+  let B = transformPcs(L(w2), {mirror:true, rot:-45});
+  const ba=bboxPcs(A), bb=bboxPcs(B);
+  B = transformPcs(B, {dx: ba.x1-bb.x0+1, dy: ba.y0-bb.y0});
+  const shifted = s => B.map(p => ({...p, x:p.x-s}));
+  let lo=0, hi=(ba.x1-ba.x0);
+  for (let i=0;i<50;i++){ const mid=(lo+hi)/2; if (anyOverlap(A, shifted(mid))) hi=mid; else lo=mid; }
+  return normalizePcs([...A, ...shifted(lo)]);
+}
+const LAYOUTS = {
+ '4Seats5Sides_1937': () => L([V(0,0),H(6,0),H(41,0),H(76,0),V(111,0),S(6,6),S(41,6),S(76,6),S(76,35)]),
+ '6Seats8Sides(1Deep)_1937': () => L([V(0,0),H(6,0),H(41,0),H(76,0),V(111,0),S(6,6),S(41,6),S(76,6),SR(82,35),D(82,70),V(111,35),V(111,70),h(82,105),S(20,62)]),
+ '5Seats5Sides(1Deep)_1937': () => L([V(0,0),H(6,0),h(41,0),H(70,0),V(105,0),S(6,6),D(41,6),S(70,6),S(6,35),S(70,35)]),
+ '7Seats8Sides_1937': () => joinWings([S(6,6),S(41,6),D(6,35),D(35,35),H(6,0),H(41,0),V(0,0),V(0,35)], [S(6,6),D(41,6),D(6,35),H(6,0),H(41,0),V(0,0),V(0,35)]),
+ '6Seats6Sides_1937': () => L([V(0,0),H(6,0),H(41,0),H(76,0),H(111,0),V(146,0),S(6,6),S(41,6),S(76,6),S(111,6),S(111,35),S(41,70)]),
+ '6Seats6Sides(2 Deep)_1937': () => L([V(0,0),H(6,0),h(41,0),h(70,0),H(99,0),V(134,0),S(6,6),D(41,6),D(70,6),S(99,6),S(6,35),S(99,35)]),
+ '5Seats8Sides_1937': () => L([V(0,0),H(6,0),H(41,0),H(76,0),V(111,0),S(6,6),S(41,6),S(76,6),SR(82,35),SR(82,70),V(111,35),V(111,70),H(82,105)]),
+ '4Seats6Sides_1937': () => L([V(0,0),H(6,0),H(41,0),H(76,0),V(111,0),S(6,6),S(41,6),S(76,6),SR(82,35),V(111,35)]),
+ '6Seats5Sides(1 Deep)_1937': () => L([V(0,0),H(6,0),h(41,0),H(70,0),V(105,0),S(6,6),D(41,6),S(70,6),S(6,35),SR(41,41),S(70,35)]),
+ '5Seats8Sides(2 Deep)_1937': () => L([V(0,0),H(6,0),h(41,0),h(70,0),H(99,0),V(134,0),S(6,6),D(41,6),D(70,6),S(99,6),SR(105,35),V(134,35),H(105,70)]),
+ '8Seats10Sides_1937': () => L([V(0,0),H(6,0),H(41,0),H(76,0),H(111,0),V(146,0),S(6,6),S(41,6),S(76,6),S(111,6),SL(6,35),V(0,35),SR(117,35),V(146,35),H(0,70),H(117,70),S(41,35),S(76,35)]),
+ '8Seats9Sides(2 Deep)_1937': () => L([V(0,0),H(6,0),H(41,0),H(76,0),H(111,0),V(146,0),S(6,6),S(41,6),S(76,6),S(111,6),DL(6,35),DL(6,64),v(0,35),v(0,64),H(6,93),S(60,60),S(95,60)]),
+ '9Seats10Sides_1937': () => joinWings([V(0,0),H(6,0),H(41,0),H(76,0),S(6,6),S(41,6),S(76,6),SL(6,35),V(0,35),SL(6,70)], [V(0,0),H(6,0),H(41,0),S(6,6),S(41,6),V(76,0),SL(6,35),V(0,35),SL(6,70)]),
+ '10Seats12Sides_1937': () => L([V(0,0),H(6,0),H(41,0),H(76,0),H(111,0),V(146,0),S(6,6),S(41,6),S(76,6),S(111,6),SR(117,35),V(146,35),H(117,70),SL(6,35),SL(6,70),SL(6,105),V(0,35),V(0,70),V(0,105),H(0,140),S(35,111),S(60,62)]),
+ '4Seats4Sides_1937': () => L([V(0,0),H(6,0),H(41,0),V(76,0),S(6,6),S(41,6),DW(6,35),DW(41,35)]),
+ '3Seats5Sides(1 Deep)_1937': () => L([V(0,0),H(6,0),h(41,0),H(70,0),V(105,0),S(6,6),D(41,6),S(70,6)]),
+ '2Seats4Sides_1937': () => L([V(0,0),H(6,0),H(41,0),V(76,0),S(6,6),S(41,6)])
+};
+const layoutCache = {};
+function setupPieces(code){ if (!layoutCache[code]) layoutCache[code] = normalizePcs(LAYOUTS[code]()); return clone(layoutCache[code]); }
+
+/* ============================ state ============================ */
+const DEFAULT_SETTINGS = {grid:1, showPrices:true, fill:0, clearance:false};
+let store = null;            // {currentId, designs:{id:{name,updated,data}}, settings}
+let state = null;            // current design data
+let settings = {...DEFAULT_SETTINGS};
+let sel = new Set();
+let view = {s:3, ox:40, oy:40};
+let tool = 'select', multiMode = false;
+let hist = [], histIdx = -1;
+let A = null;                // last analysis
+let dragInfo = null;         // live drag (for HUD)
+
+function newDesignData(name){ return {name: name || 'My Living Room', room:{w:192, h:168}, pieces:[], objects:[], nextId:1}; }
+function allItems(){ return [...state.pieces, ...state.objects]; }
+function itemById(id){ return state.pieces.find(p => p.id === id) || state.objects.find(o => o.id === id); }
+function newId(prefix){ return prefix + (state.nextId++); }
+
+/* ============================ analysis ============================ */
+function analyze(){
+  const pcs = state.pieces, objs = state.objects;
+  const poly = {}, bb = {};
+  for (const it of [...pcs, ...objs]) { poly[it.id] = polyOf(it); bb[it.id] = bboxOf(poly[it.id]); }
+  // union-find over touching pieces
+  const parent = {}; pcs.forEach(p => parent[p.id] = p.id);
+  const find = x => { while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; };
+  const unite = (a,b) => { a=find(a); b=find(b); if (a!==b) { if (idNum(a) < idNum(b)) parent[b]=a; else parent[a]=b; } };
+  const bad = new Set(), out = new Set(), collisions = [];
+  const items = [...pcs, ...objs];
+  for (let i=0;i<items.length;i++) for (let j=i+1;j<items.length;j++){
+    const a = items[i], b = items[j];
+    if (a.kind && b.kind) continue;
+    if (!boxNear(bb[a.id], bb[b.id], TOUCH_TOL)) continue;
+    const pa = poly[a.id], pb = poly[b.id];
+    if (!a.kind && !b.kind && polyDist(pa,pb).d <= TOUCH_TOL) unite(a.id, b.id);
+    if (pairCollides(a,b) && overlapDepth(pa,pb) > OVERLAP_EPS){ bad.add(a.id); bad.add(b.id); collisions.push([a.id,b.id]); }
+  }
+  const W = state.room.w, Hh = state.room.h;
+  for (const p of pcs){ const b = bb[p.id]; if (b.x0 < -OUT_EPS || b.y0 < -OUT_EPS || b.x1 > W+OUT_EPS || b.y1 > Hh+OUT_EPS) out.add(p.id); }
+  // groups
+  const gmap = {};
+  for (const p of pcs){ const r = find(p.id); (gmap[r] = gmap[r] || []).push(p); }
+  const groups = Object.keys(gmap).sort((a,b) => idNum(a) - idNum(b)).map((root, i) => {
+    const list = gmap[root];
+    const b = bboxOfPolys(list.map(p => poly[p.id]));
+    const counts = {}; let seats = 0, price = 0, addons = 0;
+    for (const p of list){ counts[p.type] = (counts[p.type]||0) + 1; if (PIECES[p.type].cat === 'seat') seats++; price += PIECES[p.type].price[settings.fill]; const ad = (p.addons && p.addons.deepBackPillow) || 0; addons += ad; price += ad * ADDON.price[settings.fill]; }
+    const letter = i < 26 ? String.fromCharCode(65+i) : 'A' + String.fromCharCode(65 + (i-26)%26) + Math.floor(i/26);
+    const hasSeat = seats > 0;
+    return {i, root, letter, name:(hasSeat ? 'Sectional ' : (list.every(p=>PIECES[p.type].cat==='table') ? 'Table ' : 'Group ')) + letter, ids:list.map(p=>p.id), pieces:list, bbox:b, w:b.x1-b.x0, h:b.y1-b.y0,
+      seats, n:list.length, counts, price, addons, hue:HUES[i % HUES.length],
+      angled: list.some(p => Math.abs(((p.r % 90) + 90) % 90) > 0.01),
+      bad: list.some(p => bad.has(p.id)), out: list.some(p => out.has(p.id))};
+  });
+  const groupOf = {}; groups.forEach(g => g.ids.forEach(id => groupOf[id] = g));
+  // clearances between sectionals (and to blocking room objects)
+  const clear = [];
+  if (settings.clearance){
+    for (let i=0;i<groups.length;i++){
+      const gi = groups[i];
+      for (let j=i+1;j<groups.length;j++){
+        const gj = groups[j]; let best = null;
+        for (const a of gi.pieces) for (const b of gj.pieces){ const d = polyDist(poly[a.id], poly[b.id]); if (!best || d.d < best.d) best = d; }
+        if (best && best.d > TOUCH_TOL && best.d < 144) clear.push({...best, from:gi.name, to:gj.name});
+      }
+      for (const o of objs){ if (!o.blocking) continue; let best = null;
+        for (const a of gi.pieces){ const d = polyDist(poly[a.id], poly[o.id]); if (!best || d.d < best.d) best = d; }
+        if (best && best.d > TOUCH_TOL && best.d < 48) clear.push({...best, from:gi.name, to:o.label || OBJ[o.kind].label});
+      }
+    }
+  }
+  const total = {counts:{}, seats:0, n:pcs.length, price:0, addons:0};
+  for (const g of groups){ for (const k in g.counts) total.counts[k] = (total.counts[k]||0) + g.counts[k]; total.seats += g.seats; total.price += g.price; total.addons += g.addons; }
+  return {poly, bb, groups, groupOf, bad, out, collisions, clear, total};
+}
+const HUES = [188,24,262,142,330,48,210,96];
+
+/* ============================ snapping ============================ */
+function edgesOf(P, meta){ return P.map((a,i) => [a, P[(i+1)%P.length], meta]); }
+function unit(a,b){ const dx=b[0]-a[0], dy=b[1]-a[1], L=Math.hypot(dx,dy)||1; return [dx/L, dy/L, L]; }
+function wallEdges(){ const W=state.room.w, H=state.room.h; return [[[0,0],[0,H]],[[0,H],[W,H]],[[W,H],[W,0]],[[W,0],[0,0]]]; }
+// candidate translations that make a moving edge flush with an antiparallel static edge
+function edgeCands(movE, statE, thr, out, perpOnly){
+  for (const [a1,b1] of movE){
+    const [d1x,d1y] = unit(a1,b1);
+    for (const [a2,b2,meta] of statE){
+      const [d2x,d2y,L2] = unit(a2,b2);
+      if (d1x*d2x + d1y*d2y > -0.999) continue;
+      const nx = d2y, ny = -d2x;
+      const s = (a1[0]-a2[0])*nx + (a1[1]-a2[1])*ny;
+      if (Math.abs(s) > thr) continue;
+      const ua = (a1[0]-a2[0])*d2x + (a1[1]-a2[1])*d2y, ub = (b1[0]-a2[0])*d2x + (b1[1]-a2[1])*d2y;
+      const mn = Math.min(ua,ub), mx = Math.max(ua,ub);
+      if (mx < -thr || mn > L2 + thr) continue;
+      const px = -s*nx, py = -s*ny;
+      if (perpOnly){ out.push({tx:px, ty:py, score:Math.abs(s), n:[nx,ny]}); continue; }
+      const src = meta;
+      if (mx > 0.5 && mn < L2 - 0.5) out.push({tx:px, ty:py, score:Math.abs(s) + thr*1.05, n:[nx,ny], d:[d2x,d2y], src});
+      for (const sh of [-mn, L2-mx, (L2-mx-mn)/2, L2-mn, -mx]){
+        if (Math.abs(sh) > thr) continue;
+        out.push({tx:px + sh*d2x, ty:py + sh*d2y, score:Math.abs(s) + Math.abs(sh), n:[nx,ny], d:[d2x,d2y], aligned:true, src});
+      }
+    }
+  }
+}
+// moving: [{id, x, y, r, item}] (base positions); returns {dx, dy, rot, rcx, rcy}
+function computeSnap(moving, dx, dy, opts){
+  opts = opts || {};
+  const thr = Math.max(SNAP_PX / view.s, 1.5);
+  const movingIds = new Set(moving.map(m => m.id));
+  const movingItems = moving.map(m => m.item);
+  const statics = allItems().filter(it => !movingIds.has(it.id));
+  const res = {dx, dy, rot:0, snapped:false};
+  if (opts.noSnap) return res;
+  const placed = (ddx, ddy, rot, rc) => moving.map(m => {
+    let P = polyOf({...m.item, x:m.x, y:m.y, r:m.r});
+    if (rot) P = rotatePts(P, rc[0], rc[1], rot);
+    return translatePts(P, ddx, ddy);
+  });
+  const collides = (polys) => {
+    for (let i=0;i<moving.length;i++){
+      const mi = movingItems[i]; const pb = bboxOf(polys[i]);
+      for (const st of statics){
+        if (!pairCollides(mi, st)) continue;
+        const sp = polyOf(st); if (!boxNear(pb, bboxOf(sp), 0)) continue;
+        if (overlapDepth(polys[i], sp) > OVERLAP_EPS) return true;
+      }
+    }
+    return false;
+  };
+  // rotation variants (wedges / angled neighbours, single piece only)
+  const variants = [{rot:0, rc:[0,0]}];
+  let wedgeMode = false;
+  if (moving.length === 1 && !movingItems[0].kind){
+    const m = moving[0];
+    const P0 = translatePts(polyOf({...m.item, x:m.x, y:m.y, r:m.r}), dx, dy);
+    const b0 = bboxOf(P0);
+    const near = statics.filter(st => !st.kind && boxNear(b0, bboxOf(polyOf(st)), thr*2));
+    const involvesWedge = m.item.type === 'wedge' || near.some(st => st.type === 'wedge' || Math.abs(normAng(st.r - m.r) % 90) > 0.01);
+    wedgeMode = involvesWedge;
+    if (involvesWedge){
+      const seen = new Set();
+      for (const st of near){
+        for (const [a2,b2] of edgesOf(polyOf(st))) for (const [a1,b1] of edgesOf(P0)){
+          const a = Math.atan2(b2[1]-a2[1], b2[0]-a2[0]) + Math.PI - Math.atan2(b1[1]-a1[1], b1[0]-a1[0]);
+          const deg = r2(normRad(a)/DEG);
+          if (Math.abs(deg) < 2) continue;
+          const key = Math.round(deg*10); if (seen.has(key)) continue; seen.add(key);
+          variants.push({rot:deg, rc:[m.x, m.y]});
+        }
+      }
+    }
+  }
+  let best = null;
+  for (const vr of variants){
+    const movP = placed(dx, dy, vr.rot, vr.rc);
+    const mb = bboxOfPolys(movP);
+    const movE = movP.flatMap(edgesOf);
+    const statE = [];
+    for (const st of statics){ const sp = polyOf(st); if (boxNear(mb, bboxOf(sp), thr)) statE.push(...edgesOf(sp, st.kind ? null : {r:st.r, wedge:st.type === 'wedge'})); }
+    if (!movingItems.every(it => it.kind === 'rug')) statE.push(...wallEdges());
+    const vthr = vr.rot ? thr * 2 : thr;
+    const cands = []; edgeCands(movE, statE, vthr, cands, false);
+    // wedge mode: prefer orientations closest to the touching neighbour's (keeps wedge backs on the outside of a curve)
+    for (const c of cands){
+      let pen = 0;
+      if (wedgeMode && c.src){
+        const m0 = moving[0]; let dd = Math.abs(normRad((m0.r + vr.rot - c.src.r) * DEG)) / DEG;
+        if (!c.src.wedge && m0.item.type !== 'wedge'){ dd = dd % 90; dd = Math.min(dd, 90 - dd); }
+        pen = 0.15 * dd;
+      }
+      c.total = c.score + pen;
+    }
+    cands.sort((a,b) => a.total - b.total);
+    let tried = 0;
+    for (const c of cands){
+      if (++tried > 24) break;
+      const score = c.total;
+      if (best && score >= best.score) break;
+      let tx = dx + c.tx, ty = dy + c.ty;
+      let P1 = placed(tx, ty, vr.rot, vr.rc);
+      if (collides(P1)) continue;
+      // pass 2: secondary flush perpendicular to the first edge
+      const c2 = []; edgeCands(P1.flatMap(edgesOf), statE, thr, c2, true);
+      const perp = c2.filter(k => Math.abs(k.n[0]*c.n[0] + k.n[1]*c.n[1]) < 0.01).sort((a,b) => a.score - b.score);
+      let did2 = false;
+      for (const k of perp){
+        if (k.score < 1e-6) { did2 = true; break; }
+        const P2 = placed(tx + k.tx, ty + k.ty, vr.rot, vr.rc);
+        if (!collides(P2)) { tx += k.tx; ty += k.ty; P1 = P2; did2 = true; break; }
+      }
+      // grid along the edge if nothing aligned it
+      if (!did2 && !c.aligned && settings.grid > 0 && c.d && (Math.abs(c.d[0]) > 0.999 || Math.abs(c.d[1]) > 0.999)){
+        const b = bboxOfPolys(P1), g = settings.grid;
+        let gx = 0, gy = 0;
+        if (Math.abs(c.d[0]) > 0.999) gx = Math.round(b.x0/g)*g - b.x0; else gy = Math.round(b.y0/g)*g - b.y0;
+        const P3 = placed(tx+gx, ty+gy, vr.rot, vr.rc);
+        if (!collides(P3)) { tx += gx; ty += gy; }
+      }
+      best = {dx:tx, dy:ty, rot:vr.rot, rc:vr.rc, score, snapped:true};
+      break;
+    }
+  }
+  if (best) return best;
+  if (settings.grid > 0){
+    const b = bboxOfPolys(placed(dx, dy, 0, [0,0])), g = settings.grid;
+    res.dx += Math.round(b.x0/g)*g - b.x0; res.dy += Math.round(b.y0/g)*g - b.y0;
+  }
+  return res;
+}
+
+/* ============================ rendering ============================ */
+const svg = $('#plan'), worldG = $('#world'), overlayG = $('#overlay');
+const w2s = (x,y) => [view.ox + x*view.s, view.oy + y*view.s];
+const s2w = (x,y) => [(x - view.ox)/view.s, (y - view.oy)/view.s];
+function pieceColors(p, g){
+  const hue = g ? g.hue : 200, cat = PIECES[p.type].cat;
+  if (cat === 'seat') return {fill:`hsl(${hue} 45% 86%)`, stroke:`hsl(${hue} 35% 38%)`, back:`hsl(${hue} 38% 72%)`};
+  if (cat === 'side') return {fill:`hsl(${hue} 35% 52%)`, stroke:`hsl(${hue} 35% 30%)`};
+  return {fill:'#dcc19a', stroke:'#7c5d36'};
+}
+function pieceShape(type, c){
+  const d = PIECES[type], w = d.w, h = d.h, x0 = -w/2, y0 = -h/2;
+  if (d.shape === 'wedge'){
+    const P = localPts({type});
+    return `<polygon class="body" points="${ptsStr(P)}" fill="${c.fill}" stroke="${c.stroke}"/>` +
+      `<polygon points="${ptsStr([[x0,y0],[-x0,y0],[-x0-1.6,y0+4],[x0+1.6,y0+4]])}" fill="${c.back}" stroke="none"/>`;
+  }
+  if (d.cat === 'seat'){
+    let s = `<rect class="body" x="${x0}" y="${y0}" width="${w}" height="${h}" rx="2.5" fill="${c.fill}" stroke="${c.stroke}"/>` +
+      `<rect x="${x0+1.2}" y="${y0+1.2}" width="${w-2.4}" height="4" rx="1.5" fill="${c.back}"/>`;
+    if (type === 'storage' || type === 'deepStorage') s += `<rect x="${x0+5}" y="${y0+9}" width="${w-10}" height="${h-14}" rx="1.5" fill="none" stroke="${c.stroke}" stroke-dasharray="2 1.5" stroke-width="0.4"/>`;
+    if (type === 'recliner' || type === 'deepRecliner') s += `<path d="M${x0+6} ${-y0-6} L0 ${-y0-2} L${-x0-6} ${-y0-6}" fill="none" stroke="${c.stroke}" stroke-width="0.8"/>`;
+    return s;
+  }
+  if (d.cat === 'side'){
+    let rx = (d.draw === 'roll') ? 3 : 0.8;
+    let s;
+    if (d.draw === 'swept' || d.draw === 'sweptR'){
+      const L = d.draw === 'swept';
+      const path = L ? `M${x0+h} ${y0} L${-x0} ${y0} L${-x0} ${-y0} L${x0+h} ${-y0} Q${x0} ${-y0} ${x0} 0 Q${x0} ${y0} ${x0+h} ${y0}Z`
+                     : `M${x0} ${y0} L${-x0-h} ${y0} Q${-x0} ${y0} ${-x0} 0 Q${-x0} ${-y0} ${-x0-h} ${-y0} L${x0} ${-y0}Z`;
+      s = `<path class="body" d="${path}" fill="${c.fill}" stroke="${c.stroke}"/>`;
+    } else s = `<rect class="body" x="${x0}" y="${y0}" width="${w}" height="${h}" rx="${rx}" fill="${c.fill}" stroke="${c.stroke}"/>`;
+    if (d.draw === 'angled' || d.draw === 'chargeAngled') s += `<path d="M${x0+2} ${-y0-1} L${-x0-2} ${y0+1}" stroke="#fff" stroke-opacity=".7" stroke-width="0.7"/>`;
+    if (d.draw === 'charge' || d.draw === 'chargeAngled') s += `<path d="M1 ${y0+0.8} L-1.6 0.4 L0.6 0.4 L-1 ${-y0-0.8}" fill="none" stroke="#fde047" stroke-width="0.9"/>`;
+    return s;
+  }
+  return `<rect class="body" x="${x0}" y="${y0}" width="${w}" height="${h}" rx="1.5" fill="${c.fill}" stroke="${c.stroke}"/>` +
+    `<rect x="${x0+3}" y="${y0+3}" width="${w-6}" height="${h-6}" rx="1" fill="none" stroke="${c.stroke}" stroke-width="0.4"/>`;
+}
+function objShape(o){
+  const k = OBJ[o.kind] || OBJ.other, w = o.w, h = o.h, x0 = -w/2, y0 = -h/2;
+  if (o.kind === 'door') return `<rect class="body" x="${x0}" y="${y0}" width="${w}" height="${h}" fill="rgba(248,250,252,.55)" stroke="${k.stroke}" stroke-dasharray="3 2" stroke-width="0.8"/>` +
+    `<path d="M${x0} ${y0} L${x0} ${-y0} M${x0} ${-y0} A${w} ${h} 0 0 0 ${-x0} ${y0}" fill="none" stroke="${k.stroke}" stroke-width="1.2"/>` +
+    `<path d="M${x0} ${y0} L${-x0} ${y0}" stroke="${k.stroke}" stroke-width="3"/>`;
+  if (o.kind === 'rug') return `<rect class="body" x="${x0}" y="${y0}" width="${w}" height="${h}" rx="2" fill="${k.fill}" fill-opacity=".85" stroke="${k.stroke}" stroke-dasharray="4 2"/>` +
+    `<rect x="${x0+4}" y="${y0+4}" width="${Math.max(0,w-8)}" height="${Math.max(0,h-8)}" rx="1" fill="none" stroke="${k.stroke}" stroke-width="0.5" stroke-opacity=".6"/>`;
+  return `<rect class="body" x="${x0}" y="${y0}" width="${w}" height="${h}" rx="1.5" fill="${k.fill}" stroke="${k.stroke}"/>`;
+}
+function worldSVG(opt){
+  opt = opt || {};
+  const W = state.room.w, H = state.room.h, an = opt.an || A;
+  let s = '';
+  s += `<rect x="-2000" y="-2000" width="${W+4000}" height="${H+4000}" fill="${opt.export ? '#fff' : '#e9ecef'}"/>`;
+  s += `<rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/>`;
+  let gl = '';
+  for (let x=12; x<W; x+=12) gl += `M${x} 0V${H}`;
+  for (let y=12; y<H; y+=12) gl += `M0 ${y}H${W}`;
+  s += `<path d="${gl}" stroke="#e3e6ea" stroke-width="1" vector-effect="non-scaling-stroke" fill="none"/>`;
+  let g5 = '';
+  for (let x=60; x<W; x+=60) g5 += `M${x} 0V${H}`;
+  for (let y=60; y<H; y+=60) g5 += `M0 ${y}H${W}`;
+  s += `<path d="${g5}" stroke="#cfd4da" stroke-width="1" vector-effect="non-scaling-stroke" fill="none"/>`;
+  const sw = 'vector-effect="non-scaling-stroke"';
+  // obstacles: rugs first, then others
+  const objs = [...state.objects].sort((a,b) => (a.kind==='rug'?0:1) - (b.kind==='rug'?0:1));
+  for (const o of objs){
+    const k = OBJ[o.kind] || OBJ.other, isSel = !opt.export && sel.has(o.id), isBad = an.bad.has(o.id);
+    s += `<g data-id="${o.id}" class="it obj${isSel?' sel':''}${isBad?' bad':''}" transform="translate(${f(o.x)} ${f(o.y)}) rotate(${o.r})" style="cursor:move">${objShape(o)}`;
+    if (isBad) s += `<rect x="${-o.w/2}" y="${-o.h/2}" width="${o.w}" height="${o.h}" fill="rgba(220,38,38,.18)" stroke="#dc2626" stroke-width="2" ${sw}/>`;
+    if (isSel) s += `<rect x="${-o.w/2-1.5}" y="${-o.h/2-1.5}" width="${o.w+3}" height="${o.h+3}" fill="none" stroke="#2563eb" stroke-width="2" ${sw}/>`;
+    s += `</g>`;
+    const label = o.label || k.label;
+    const sw90 = Math.abs((((o.r % 180) + 180) % 180) - 90) < 1;
+    const vwid = sw90 ? o.h : o.w, vhgt = sw90 ? o.w : o.h;
+    const vert = vhgt > vwid * 1.5;
+    const span = vert ? vhgt : vwid;
+    const fs = Math.min(clamp(span / Math.max(4, label.length * 0.62), 3, 7), o.kind === 'window' ? 4.5 : 7);
+    s += `<text x="${f(o.x)}" y="${f(o.y)}" font-size="${f(fs)}" text-anchor="middle" dominant-baseline="central" fill="${k.text||'#374151'}" style="pointer-events:none;font-weight:600" transform="rotate(${vert?-90:0} ${f(o.x)} ${f(o.y)})">${esc(label)}</text>`;
+  }
+  // pieces
+  for (const p of state.pieces){
+    const g = an.groupOf[p.id], c = pieceColors(p, g), d = PIECES[p.type];
+    const isSel = !opt.export && sel.has(p.id), isBad = an.bad.has(p.id), isOut = an.out.has(p.id);
+    s += `<g data-id="${p.id}" class="it pc" transform="translate(${f(p.x)} ${f(p.y)}) rotate(${p.r})" style="cursor:move">`;
+    s += pieceShape(p.type, c).replace(/<(rect|polygon|path) class="body"/g, `<$1 class="body" stroke-width="1" ${sw}`);
+    const P = localPts(p);
+    if (isBad) s += `<polygon points="${ptsStr(P)}" fill="rgba(220,38,38,.28)" stroke="#dc2626" stroke-width="2.2" ${sw}/>`;
+    else if (isOut) s += `<polygon points="${ptsStr(P)}" fill="rgba(234,88,12,.14)" stroke="#ea580c" stroke-width="2" stroke-dasharray="5 3" ${sw}/>`;
+    if (isSel) s += `<polygon points="${ptsStr(P)}" fill="rgba(37,99,235,.12)" stroke="#2563eb" stroke-width="2.4" ${sw}/>`;
+    s += `</g>`;
+    if (d.cat !== 'side'){
+      const fs = d.cat === 'table' ? 5 : 6.5;
+      const ad = (p.addons && p.addons.deepBackPillow) ? '+P' : '';
+      s += `<text x="${f(p.x)}" y="${f(p.y + (d.cat==='seat'?1.5:0))}" font-size="${fs}" text-anchor="middle" dominant-baseline="central" fill="${c.stroke}" style="pointer-events:none;font-weight:700">${d.abbr}${ad}</text>`;
+    }
+  }
+  s += `<rect x="0" y="0" width="${W}" height="${H}" fill="none" stroke="#374151" stroke-width="${opt.export?4:3}" ${sw}/>`;
+  return s;
+}
+function overlaySVG(){
+  const vw = svg.clientWidth, vh = svg.clientHeight, sc = view.s, W = state.room.w, H = state.room.h;
+  let s = '';
+  // clearance lines
+  for (const c of A.clear){
+    const [x1,y1] = w2s(...c.a), [x2,y2] = w2s(...c.b);
+    const tight = c.d < 18, col = tight ? '#ea580c' : '#7c3aed';
+    s += `<line x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" stroke="${col}" stroke-width="1.6" stroke-dasharray="5 3"/>`;
+    s += `<circle cx="${f(x1)}" cy="${f(y1)}" r="2.5" fill="${col}"/><circle cx="${f(x2)}" cy="${f(y2)}" r="2.5" fill="${col}"/>`;
+    const mx = (x1+x2)/2, my = (y1+y2)/2, t = fmtLen(c.d), tw = t.length*6.4 + 10;
+    s += `<g class="clr" style="pointer-events:none"><rect x="${f(mx-tw/2)}" y="${f(my-9)}" width="${f(tw)}" height="18" rx="9" fill="${col}"/><text x="${f(mx)}" y="${f(my)}" font-size="11" fill="#fff" text-anchor="middle" dominant-baseline="central" font-weight="600">${t}</text></g>`;
+  }
+  // group labels (shortened when zoomed out, nudged up to avoid overlapping each other)
+  const placedL = [];
+  const gl = A.groups.map(g => { const [cx, top] = w2s((g.bbox.x0 + g.bbox.x1)/2, g.bbox.y0); return {g, cx, top, gw:(g.bbox.x1-g.bbox.x0)*sc}; }).sort((a,b) => a.top - b.top || a.cx - b.cx);
+  for (const {g, cx, top, gw} of gl){
+    const dims = `${fmtLen(g.w)} × ${fmtLen(g.h)}`, seatsT = g.seats ? `${g.seats} seat${g.seats>1?'s':''} · ${g.n} pc` : `${g.n} pc`;
+    const opts = [`${g.name} · ${dims} · ${seatsT}`, `${g.name} · ${dims}`, `${g.letter} · ${dims}`, g.letter];
+    const maxW = Math.max(gw + 60, 30);
+    let txt = opts.find(t => t.length * 6.1 + 22 <= maxW) || g.letter;
+    const tw = Math.max(36, txt.length * 6.1 + 22);
+    const [, bot] = w2s(0, g.bbox.y1);
+    const pieceBoxes = A.groups.filter(o => o !== g).map(o => { const [x0, y0] = w2s(o.bbox.x0, o.bbox.y0), [x1, y1] = w2s(o.bbox.x1, o.bbox.y1); return {x0, y0, x1, y1}; });
+    const free = yy => !placedL.some(r => !(cx - tw/2 > r.x1 + 4 || cx + tw/2 < r.x0 - 4 || yy > r.y1 + 2 || yy + 20 < r.y0 - 2)) &&
+                       !pieceBoxes.some(r => !(cx - tw/2 > r.x1 || cx + tw/2 < r.x0 || yy > r.y1 || yy + 20 < r.y0));
+    let y = Math.max(top - 26, 24);
+    if (!free(y) && free(bot + 6)) y = bot + 6;
+    for (let k = 0; k < 8 && y < top; k++){
+      const hit = placedL.find(r => !(cx - tw/2 > r.x1 + 4 || cx + tw/2 < r.x0 - 4 || y > r.y1 + 2 || y + 20 < r.y0 - 2));
+      if (!hit) break; y = hit.y0 - 23;
+    }
+    placedL.push({x0:cx - tw/2, x1:cx + tw/2, y0:y, y1:y + 20});
+    const col = g.bad ? '#dc2626' : g.out ? '#ea580c' : `hsl(${g.hue} 40% 32%)`;
+    const leader = (y < top && top - (y + 20) > 8) ? `<line x1="${f(cx)}" y1="${f(y+20)}" x2="${f(cx)}" y2="${f(top-2)}" stroke="${col}" stroke-width="1" stroke-dasharray="2 2"/>` : '';
+    s += `<g data-group="${g.root}" style="cursor:pointer" title="${esc(opts[0])}">${leader}<rect x="${f(cx-tw/2)}" y="${f(y)}" width="${f(tw)}" height="20" rx="10" fill="#fff" stroke="${col}" stroke-width="1.3"/>` +
+      `<circle cx="${f(cx-tw/2+11)}" cy="${f(y+10)}" r="4.5" fill="hsl(${g.hue} 45% 55%)"/>` +
+      `<text x="${f(cx+6)}" y="${f(y+10.5)}" font-size="11.5" text-anchor="middle" dominant-baseline="central" fill="${col}" font-weight="600">${esc(txt)}</text></g>`;
+  }
+  // selection bbox (multi)
+  const selItems = [...sel].map(itemById).filter(Boolean);
+  if (selItems.length > 1){
+    const b = bboxOfPolys(selItems.map(polyOf)); const [x0,y0] = w2s(b.x0,b.y0), [x1,y1] = w2s(b.x1,b.y1);
+    s += `<rect x="${f(x0-4)}" y="${f(y0-4)}" width="${f(x1-x0+8)}" height="${f(y1-y0+8)}" fill="none" stroke="#2563eb" stroke-dasharray="6 4" stroke-width="1.2" style="pointer-events:none"/>`;
+  }
+  // marquee
+  if (marquee){ const x=Math.min(marquee.x0,marquee.x1), y=Math.min(marquee.y0,marquee.y1); s += `<rect x="${x}" y="${y}" width="${Math.abs(marquee.x1-marquee.x0)}" height="${Math.abs(marquee.y1-marquee.y0)}" fill="rgba(37,99,235,.08)" stroke="#2563eb" stroke-dasharray="4 3"/>`; }
+  // rulers
+  const RB = 22;
+  s += `<g style="pointer-events:none"><rect x="0" y="0" width="${vw}" height="${RB}" fill="#f8fafc"/><rect x="0" y="0" width="${RB}" height="${vh}" fill="#f8fafc"/>`;
+  const stepFt = sc*12 >= 34 ? 1 : sc*12 >= 17 ? 2 : sc*12 >= 7 ? 5 : 10;
+  const [rx0, ry0] = w2s(0,0), [rx1, ry1] = w2s(W,H);
+  s += `<rect x="${f(rx0)}" y="${RB-4}" width="${f(rx1-rx0)}" height="4" fill="#bfe3e7"/><rect x="${RB-4}" y="${f(ry0)}" width="4" height="${f(ry1-ry0)}" fill="#bfe3e7"/>`;
+  const [wx0] = s2w(RB,0), [wx1] = s2w(vw,0), [, wy0] = s2w(0,RB), [, wy1] = s2w(0,vh);
+  let tk = '';
+  for (let ft = Math.ceil(wx0/12); ft*12 <= wx1; ft++){
+    const x = view.ox + ft*12*sc; const major = ft % stepFt === 0;
+    tk += `M${f(x)} ${major ? 9 : 16}V${RB}`;
+    if (major) s += `<text x="${f(x+3)}" y="11" font-size="10" fill="#475569">${ft}′</text>`;
+  }
+  for (let ft = Math.ceil(wy0/12); ft*12 <= wy1; ft++){
+    const y = view.oy + ft*12*sc; const major = ft % stepFt === 0;
+    tk += `M${major ? 9 : 16} ${f(y)}H${RB}`;
+    if (major) s += `<text x="11" y="${f(y+3)}" font-size="10" fill="#475569" transform="rotate(-90 11 ${f(y+3)})" text-anchor="end">${ft}′</text>`;
+  }
+  s += `<path d="${tk}" stroke="#94a3b8" stroke-width="1"/><rect x="0" y="0" width="${RB}" height="${RB}" fill="#eef2f6"/>`;
+  s += `<line x1="0" y1="${RB}" x2="${vw}" y2="${RB}" stroke="#d1d5db"/><line x1="${RB}" y1="0" x2="${RB}" y2="${vh}" stroke="#d1d5db"/></g>`;
+  // room dimension labels
+  const lbl = (x,y,t,rot) => `<g style="pointer-events:none"><text x="${f(x)}" y="${f(y)}" font-size="11.5" font-weight="600" fill="#374151" text-anchor="middle" ${rot?`transform="rotate(-90 ${f(x)} ${f(y)})"`:''} paint-order="stroke" stroke="#e9ecef" stroke-width="4">${t}</text></g>`;
+  s += lbl((rx0+rx1)/2, ry1 + 16, fmtLen(W)) + lbl(rx1 + 15, (ry0+ry1)/2, fmtLen(H), true);
+  return s;
+}
+let marquee = null, rafPending = false;
+function renderPlan(){
+  worldG.setAttribute('transform', `translate(${f(view.ox)} ${f(view.oy)}) scale(${view.s})`);
+  worldG.innerHTML = worldSVG();
+  overlayG.innerHTML = overlaySVG();
+  const W = state.room.w, H = state.room.h;
+  let hud = `Room ${fmtLen(W)} × ${fmtLen(H)} · ${Math.round(view.s/3*100)}%`;
+  if (dragInfo){ const b = dragInfo; hud = `Left wall → ${fmtLen(b.x0)} · Top wall → ${fmtLen(b.y0)} · ${b.snapped ? 'snapped' : (b.noSnap ? 'free (Alt)' : 'grid')}`; }
+  $('#hud').textContent = hud;
+  $('#hint').style.display = (state.pieces.length || state.objects.length) ? 'none' : '';
+}
+function scheduleRender(){ if (rafPending) return; rafPending = true; requestAnimationFrame(() => { rafPending = false; A = analyze(); renderPlan(); }); }
+function renderAll(){ A = analyze(); renderPlan(); renderPanels(); }
+
+/* ============================ panels ============================ */
+function miniPieceSVG(type){
+  const d = PIECES[type], c = pieceColors({type}, {hue:188});
+  const pad = 2, w = d.w + pad*2, h = Math.max(d.h, 12) + pad*2;
+  return `<svg viewBox="${-w/2} ${-h/2} ${w} ${h}" preserveAspectRatio="xMidYMid meet">${pieceShape(type, c).replace(/class="body"/g, 'class="body" stroke-width="0.9"')}</svg>`;
+}
+function setupPreviewSVG(code){
+  const pcs = setupPieces(code), b = bboxPcs(pcs), pad = 4;
+  let s = `<svg viewBox="${f(b.x0-pad)} ${f(b.y0-pad)} ${f(b.x1-b.x0+pad*2)} ${f(b.y1-b.y0+pad*2)}" preserveAspectRatio="xMidYMid meet">`;
+  for (const p of pcs){ const c = pieceColors(p, {hue:188}); s += `<polygon points="${ptsStr(polyOf(p))}" fill="${c.fill}" stroke="${c.stroke}" stroke-width="1.2"/>`; }
+  return s + '</svg>';
+}
+function buildStaticPanels(){
+  document.querySelectorAll('i[data-ic]').forEach(el => { el.outerHTML = icon(el.dataset.ic); });
+  let h = '';
+  for (const [title, types] of PALETTE){
+    h += `<div class="sub">${title}</div><div class="pal">`;
+    for (const t of types){ const d = PIECES[t];
+      h += `<div class="pal-item" data-piece="${t}" title="${esc(d.name + ' — ' + d.src)}">${miniPieceSVG(t)}<div class="nm">${esc(d.name)}${d.est?'<span class="est">est</span>':''}</div><div class="dm">${fmtIn(d.w)} × ${fmtIn(d.h)}<span class="price"> · ${money(d.price[settings.fill])}</span></div></div>`; }
+    h += `</div>`;
+  }
+  h += `<div class="note">Seat sizes are Lovesac's published dimensions. Pieces marked <span class="est">est</span> use estimated footprints (see README). Prices are frame/insert only.</div>`;
+  $('#piecePal').innerHTML = h;
+  let o = '';
+  for (const k in OBJ){ const d = OBJ[k];
+    o += `<div class="pal-item" data-obj="${k}" title="Add ${d.label}"><svg viewBox="-30 -20 60 40"><rect x="-24" y="${-Math.min(16, d.h/d.w*24)}" width="48" height="${Math.max(4,Math.min(32, d.h/d.w*48))}" fill="${d.fill}" stroke="${d.stroke}" stroke-width="1.5"/></svg><div class="nm">${d.label}</div><div class="dm">${fmtIn(d.w)} × ${fmtIn(d.h)}</div></div>`; }
+  $('#objPal').innerHTML = o;
+  let sh = '', grp = '';
+  for (const st of SETUPS){
+    if (st.group !== grp){ grp = st.group; sh += `<div class="sub">${grp}</div><div class="setups">`; }
+    const pcs = setupPieces(st.code), b = bboxPcs(pcs);
+    const seats = pcs.filter(p => PIECES[p.type].cat === 'seat').length;
+    const price = pcs.reduce((a,p) => a + PIECES[p.type].price[settings.fill], 0) + (st.addons||0)*ADDON.price[settings.fill];
+    sh += `<button class="setup" data-setup="${esc(st.code)}">${setupPreviewSVG(st.code)}<div><div class="nm">${esc(st.name)}</div><div class="dm">${seats} seats · ${pcs.length} pc · ${fmtLen(b.x1-b.x0)} × ${fmtLen(b.y1-b.y0)}${st.addons?' · +1 pillow':''}</div><div class="dm price">${money(price)} frames</div></div></button>`;
+    const next = SETUPS[SETUPS.indexOf(st)+1];
+    if (!next || next.group !== grp) sh += `</div>`;
+  }
+  sh += `<div class="note">Piece counts match Lovesac's catalog exactly. Lovesac only publishes a thumbnail for each setup, so the exact arrangement here is my approximation built from real piece sizes.</div>`;
+  $('#setupList').innerHTML = sh;
+}
+function refreshPalettePrices(){ buildStaticPanels(); }
+function countsTable(counts, addons){
+  let rows = '';
+  const order = Object.keys(PIECES).filter(k => counts[k]);
+  for (const k of order){ const d = PIECES[k]; rows += `<tr><td>${esc(d.name)}${d.est?'<span class="est">est</span>':''}</td><td class="q">× ${counts[k]}</td><td class="p price">${money(d.price[settings.fill]*counts[k])}</td></tr>`; }
+  if (addons) rows += `<tr><td>${ADDON.name}</td><td class="q">× ${addons}</td><td class="p price">${money(ADDON.price[settings.fill]*addons)}</td></tr>`;
+  return `<table class="cnt">${rows}</table>`;
+}
+function renderSummary(){
+  const an = A;
+  let h = `<h3>Summary <label class="chk" style="text-transform:none;letter-spacing:0;font-weight:500"><input type="checkbox" id="pricesChk" ${settings.showPrices?'checked':''}> Show prices</label></h3>`;
+  h += `<div class="row price"><label>Fill</label><select id="fillSel"><option value="0" ${settings.fill==0?'selected':''}>Standard Foam</option><option value="1" ${settings.fill==1?'selected':''}>Lovesoft</option></select></div>`;
+  if (!an.groups.length) h += `<div class="muted">No pieces yet.</div>`;
+  for (const g of an.groups){
+    h += `<div class="card" data-gcard="${g.root}"><div class="card-h" data-act="selGroup" data-arg="${g.root}"><span class="dot" style="background:hsl(${g.hue} 45% 55%)"></span><b>${esc(g.name)}</b><span class="dims">${fmtLen(g.w)} × ${fmtLen(g.h)}${g.angled?' (bbox)':''}</span></div>`;
+    h += `<div class="stats">${g.seats} seat${g.seats===1?'':'s'} · ${g.n} piece${g.n===1?'':'s'}${g.bad?' · <span style="color:#dc2626">overlap</span>':''}${g.out?' · <span style="color:#ea580c">outside room</span>':''}</div>`;
+    h += countsTable(g.counts, g.addons) + `<div class="tot price"><span>Frames</span><span>${money(g.price)}</span></div></div>`;
+  }
+  if (an.groups.length){
+    h += `<div class="card total-card" id="roomTotal"><div class="card-h"><b>Whole room · shopping list</b></div>`;
+    h += `<div class="stats">${an.groups.filter(g=>g.seats).length} sectional${an.groups.filter(g=>g.seats).length===1?'':'s'} · <b data-k="seats">${an.total.seats}</b> seats · <b data-k="pieces">${an.total.n}</b> pieces</div>`;
+    h += countsTable(an.total.counts, an.total.addons);
+    h += `<div class="tot price"><span>Est. total</span><span data-k="total">${money(an.total.price)}</span></div>`;
+    h += `<div class="note price"><b>Estimated price: frames only, covers not included.</b> Uses Lovesac's ${settings.fill ? 'Lovesoft' : 'Standard Foam'} frame/insert list prices as of ${CATALOG_DATE}. Not a quote. Sales, bundles and tax aren't included.</div></div>`;
+  }
+  // warnings
+  h += `<div class="sub">Checks</div>`;
+  const name = id => { const it = itemById(id); if (!it) return id; if (it.kind) return it.label || OBJ[it.kind].label; const g = an.groupOf[id]; return `${PIECES[it.type].name} (${g ? g.name : ''})`; };
+  if (an.collisions.length){
+    const seen = new Set();
+    for (const [a,b] of an.collisions){ const t = `${name(a)} overlaps ${name(b)}`; if (seen.has(t)) continue; seen.add(t); h += `<div class="warn bad">⚠ ${esc(t)}</div>`; }
+  }
+  if (an.out.size){
+    const byG = {}; for (const id of an.out){ const g = an.groupOf[id]; byG[g.name] = (byG[g.name]||0) + 1; }
+    for (const k in byG) h += `<div class="warn out">⚠ ${esc(k)}: ${byG[k]} piece${byG[k]>1?'s':''} outside the room</div>`;
+  }
+  if (!an.collisions.length && !an.out.size && an.groups.length) h += `<div class="warn ok">✓ Nothing overlaps and everything is inside the room</div>`;
+  h += `<label class="chk" style="margin-top:8px"><input type="checkbox" id="clearChk" ${settings.clearance?'checked':''}> Show clearance distances</label>`;
+  if (settings.clearance){
+    if (!an.clear.length) h += `<div class="note">Nothing to measure: no sectionals within 12 ft of each other, and none within 4 ft of a blocking object.</div>`;
+    for (const c of an.clear) h += `<div class="warn ${c.d < 18 ? 'out' : 'ok'}" style="${c.d>=18?'background:#ede9fe;color:#5b21b6':''}">↔ ${esc(c.from)} → ${esc(c.to)}: <b>${fmtLen(c.d)}</b>${c.d < 18 ? ' (tight)' : ''}</div>`;
+  }
+  $('#sumPanel').innerHTML = h;
+}
+function renderSelection(){
+  const items = [...sel].map(itemById).filter(Boolean);
+  let h = `<h3>Selection</h3>`;
+  if (!items.length){
+    h += `<div class="muted">Nothing selected. Tap a piece to edit it, double-tap to grab its whole sectional, or drag across empty floor to box-select.</div>`;
+  } else if (items.length === 1 && !items[0].kind){
+    const p = items[0], d = PIECES[p.type], g = A.groupOf[p.id];
+    h += `<div class="selhead"><b style="font-size:15px">${esc(d.name)}</b>${d.est?'<span class="est">est</span>':''}<span class="muted">${g?esc(g.name):''}</span></div>`;
+    h += `<div class="row"><label>Type</label><select id="typeSel" style="flex:1">${Object.keys(PIECES).filter(k=>PIECES[k].cat===d.cat).map(k=>`<option value="${k}" ${k===p.type?'selected':''}>${esc(PIECES[k].name)}</option>`).join('')}</select></div>`;
+    h += `<div class="row"><label>Footprint</label><span>${fmtIn(d.w)} × ${fmtIn(d.h)}${d.shape==='wedge'?` (front ≈${fmtIn(d.front)})`:''}</span></div>`;
+    h += `<div class="row"><label>Rotation</label><span class="fi"><input type="number" id="rotIn" value="${r2(p.r)}" step="45" style="width:66px">°</span><button class="btn" data-act="rot" data-arg="-90">${icon('rotl')}</button><button class="btn" data-act="rot" data-arg="90">${icon('rotr')}</button><button class="btn" data-act="rot" data-arg="45">45°</button></div>`;
+    h += `<div class="row price"><label>Frame</label><span>${money(d.price[settings.fill])} <span class="muted">· SKU ${d.sku}</span></span></div>`;
+    if (d.cat === 'seat'){
+      const n = (p.addons && p.addons.deepBackPillow) || 0;
+      h += `<div class="row"><label>Extra pillow</label><span class="stepper"><button data-act="addon" data-arg="-1">−</button><b id="addonN">${n}</b><button data-act="addon" data-arg="1">+</button></span><span class="muted" style="font-size:12px">Deep Back Pillow<span class="price"> (${money(ADDON.price[settings.fill])})</span></span></div>`;
+    }
+    h += `<div class="note">${esc(d.src)}</div>`;
+    h += `<div class="btns" style="margin-top:8px"><button class="btn" data-act="group">${icon('group')}Select sectional</button><button class="btn" data-act="dup">${icon('dup')}Duplicate</button><button class="btn danger" data-act="del">${icon('trash')}Delete</button></div>`;
+  } else if (items.length === 1){
+    const o = items[0];
+    h += `<div class="selhead"><b style="font-size:15px">${esc(o.label || OBJ[o.kind].label)}</b><span class="muted">room object</span></div>`;
+    h += `<div class="row"><label>Label</label><input type="text" id="objLabel" value="${esc(o.label||'')}"></div>`;
+    h += `<div class="row"><label>Kind</label><select id="objKind">${Object.keys(OBJ).map(k=>`<option value="${k}" ${k===o.kind?'selected':''}>${OBJ[k].label}</option>`).join('')}</select></div>`;
+    h += `<div class="row"><label>Width</label><span class="fi"><input type="number" id="objW" value="${r2(o.w)}" min="1" step="1" style="width:66px">in</span><span class="muted">${fmtLen(o.w)}</span></div>`;
+    h += `<div class="row"><label>Depth</label><span class="fi"><input type="number" id="objH" value="${r2(o.h)}" min="1" step="1" style="width:66px">in</span><span class="muted">${fmtLen(o.h)}</span></div>`;
+    h += `<div class="row"><label>Rotation</label><span class="fi"><input type="number" id="rotIn" value="${r2(o.r)}" step="90" style="width:66px">°</span><button class="btn" data-act="rot" data-arg="90">${icon('rotr')}</button></div>`;
+    h += `<label class="chk"><input type="checkbox" id="objBlock" ${o.blocking?'checked':''}> Blocks furniture (flag overlaps)</label>`;
+    h += `<div class="btns" style="margin-top:8px"><button class="btn" data-act="dup">${icon('dup')}Duplicate</button><button class="btn danger" data-act="del">${icon('trash')}Delete</button></div>`;
+  } else {
+    const pcs = items.filter(i => !i.kind), objs = items.length - pcs.length;
+    const counts = {}; pcs.forEach(p => counts[p.type] = (counts[p.type]||0) + 1);
+    const b = bboxOfPolys(items.map(polyOf));
+    h += `<div class="selhead"><b style="font-size:15px">${items.length} items</b><span class="muted">${pcs.length} piece${pcs.length===1?'':'s'}${objs?` · ${objs} object${objs>1?'s':''}`:''} · ${fmtLen(b.x1-b.x0)} × ${fmtLen(b.y1-b.y0)}</span></div>`;
+    h += countsTable(counts, 0);
+    h += `<div class="btns" style="margin-top:8px"><button class="btn" data-act="rot" data-arg="-90">${icon('rotl')}</button><button class="btn" data-act="rot" data-arg="90">${icon('rotr')}</button><button class="btn" data-act="rot" data-arg="45">45°</button><button class="btn" data-act="dup">${icon('dup')}Duplicate</button><button class="btn danger" data-act="del">${icon('trash')}Delete</button></div>`;
+  }
+  $('#selPanel').innerHTML = h;
+}
+function renderDesigns(){
+  const ids = Object.keys(store.designs).sort((a,b) => store.designs[b].updated - store.designs[a].updated);
+  $('#designSel').innerHTML = ids.map(id => `<option value="${id}" ${id===store.currentId?'selected':''}>${esc(store.designs[id].name)}</option>`).join('');
+  if (document.activeElement !== $('#designName')) $('#designName').value = state.name;
+  $('#dname').textContent = state.name;
+  const W = state.room.w, H = state.room.h;
+  const set = (id, v) => { const el = $(id); if (document.activeElement !== el) el.value = v; };
+  set('#roomWft', Math.floor(W/12)); set('#roomWin', r2(W - Math.floor(W/12)*12));
+  set('#roomHft', Math.floor(H/12)); set('#roomHin', r2(H - Math.floor(H/12)*12));
+  $('#gridSel').value = String(settings.grid);
+}
+function renderPanels(){
+  renderSelection(); renderSummary(); renderDesigns();
+  document.body.classList.toggle('hide-prices', !settings.showPrices);
+  $('#bPrices').classList.toggle('on', settings.showPrices);
+  $('#bClear').classList.toggle('on', settings.clearance);
+  $('#bSelect').classList.toggle('on', tool === 'select');
+  $('#bPan').classList.toggle('on', tool === 'pan');
+  $('#bMulti').classList.toggle('on', multiMode);
+  svg.classList.toggle('panning', tool === 'pan');
+  $('#bUndo').disabled = histIdx <= 0; $('#bRedo').disabled = histIdx >= hist.length - 1;
+  document.querySelectorAll('.selreq').forEach(b => b.disabled = sel.size === 0);
+}
+
+/* ============================ storage & history ============================ */
+let lsOK = true;
+function loadStore(){
+  try { const raw = localStorage.getItem(LS_KEY); if (raw){ const s = JSON.parse(raw); if (s && s.designs && Object.keys(s.designs).length) return s; } } catch (e) { lsOK = false; }
+  const id = 'd' + Date.now().toString(36);
+  return {currentId:id, designs:{[id]:{name:'My Living Room', updated:Date.now(), data:newDesignData('My Living Room')}}, settings:{...DEFAULT_SETTINGS}};
+}
+function sanitize(d){
+  const out = newDesignData(d && d.name);
+  if (!d || typeof d !== 'object') return out;
+  if (d.room && +d.room.w > 0 && +d.room.h > 0) out.room = {w:+d.room.w, h:+d.room.h};
+  out.pieces = (Array.isArray(d.pieces) ? d.pieces : []).filter(p => p && PIECES[p.type] && isFinite(p.x) && isFinite(p.y)).map(p => ({id:String(p.id||''), type:p.type, x:+p.x, y:+p.y, r:normAng(+p.r||0), ...(p.addons && p.addons.deepBackPillow ? {addons:{deepBackPillow:Math.max(0, p.addons.deepBackPillow|0)}} : {})}));
+  out.objects = (Array.isArray(d.objects) ? d.objects : []).filter(o => o && OBJ[o.kind] && isFinite(o.x) && isFinite(o.y)).map(o => ({id:String(o.id||''), kind:o.kind, label:String(o.label||OBJ[o.kind].label), x:+o.x, y:+o.y, w:Math.max(1,+o.w||OBJ[o.kind].w), h:Math.max(1,+o.h||OBJ[o.kind].h), r:normAng(+o.r||0), blocking:!!o.blocking}));
+  const used = new Set(); let maxN = 0;
+  for (const it of [...out.pieces, ...out.objects]){ const pre = it.kind ? 'o' : 'p'; const n = idNum(it.id);
+    if (it.id[0] === pre && n > 0 && String(n) === it.id.slice(1) && !used.has(it.id)) { used.add(it.id); maxN = Math.max(maxN, n); } else it.id = null; }
+  let n = maxN + 1;
+  for (const it of [...out.pieces, ...out.objects]) if (!it.id) it.id = (it.kind ? 'o' : 'p') + (n++);
+  out.nextId = Math.max(n, +d.nextId || 1);
+  return out;
+}
+function persist(){
+  store.designs[store.currentId] = {name:state.name, updated:Date.now(), data:state};
+  store.settings = settings;
+  try { localStorage.setItem(LS_KEY, JSON.stringify(store)); lsOK = true; $('#saveState').textContent = 'saved'; }
+  catch (e) { lsOK = false; $('#saveState').textContent = 'not saved (storage unavailable)'; }
+}
+function resetHistory(){ hist = [JSON.stringify(state)]; histIdx = 0; }
+function commit(){
+  const snap = JSON.stringify(state);
+  if (hist[histIdx] !== snap){ hist = hist.slice(0, histIdx + 1); hist.push(snap); if (hist.length > 150) hist.shift(); histIdx = hist.length - 1; }
+  persist(); renderAll();
+}
+function restore(snap){ state = JSON.parse(snap); for (const id of [...sel]) if (!itemById(id)) sel.delete(id); persist(); renderAll(); }
+function undo(){ if (histIdx > 0){ histIdx--; restore(hist[histIdx]); } }
+function redo(){ if (histIdx < hist.length - 1){ histIdx++; restore(hist[histIdx]); } }
+function switchDesign(id){
+  if (!store.designs[id]) return;
+  persist();
+  store.currentId = id; state = sanitize(store.designs[id].data); sel.clear(); resetHistory(); persist(); fitView(); renderAll();
+}
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 1800); }
+
+/* ============================ view ============================ */
+function fitView(){
+  const vw = svg.clientWidth || 800, vh = svg.clientHeight || 600, W = state.room.w, H = state.room.h;
+  const padL = 22 + 34, padT = 22 + 40, padR = 44, padB = 40;
+  const s = Math.max(0.3, Math.min((vw - padL - padR) / W, (vh - padT - padB) / H));
+  view.s = s; view.ox = padL + (vw - padL - padR - W*s)/2; view.oy = padT + (vh - padT - padB - H*s)/2;
+}
+function zoomAt(factor, sx, sy){
+  const ns = clamp(view.s * factor, 0.4, 40);
+  const [wx, wy] = s2w(sx, sy); view.s = ns; view.ox = sx - wx*ns; view.oy = sy - wy*ns; scheduleRender();
+}
+
+/* ============================ editing ops ============================ */
+function itemsCollide(polys, items, ignore, gap){
+  const others = allItems().filter(it => !ignore.has(it.id));
+  gap = gap || 0;
+  for (let i=0;i<polys.length;i++){ const pb = bboxOf(polys[i]);
+    for (const st of others){ if (!pairCollides(items[i], st)) continue; const sp = polyOf(st); if (!boxNear(pb, bboxOf(sp), gap + 0.5)) continue;
+      if (gap > 0 ? polyDist(polys[i], sp).d < gap : overlapDepth(polys[i], sp) > OVERLAP_EPS) return true; } }
+  return false;
+}
+// find free offset for a set of items (already in state or not), near a target center
+function findFreeSpot(items, cx, cy, gap){
+  const polys0 = items.map(polyOf), b = bboxOfPolys(polys0), bw = b.x1-b.x0, bh = b.y1-b.y0;
+  const ignore = new Set(items.map(i => i.id));
+  const W = state.room.w, H = state.room.h;
+  const tryAt = (x0, y0, needInside, gp) => {
+    const dx = x0 - b.x0, dy = y0 - b.y0;
+    if (needInside && (x0 < 0 || y0 < 0 || x0 + bw > W || y0 + bh > H)) return null;
+    const P = polys0.map(p => translatePts(p, dx, dy));
+    return itemsCollide(P, items, ignore, gp) ? null : [dx, dy];
+  };
+  const step = 6, sx = Math.round((cx - bw/2)/step)*step, sy = Math.round((cy - bh/2)/step)*step;
+  for (const [inside, gp] of [[true, gap||0], [true, Math.min(gap||0, 1)], [false, gap||0]]){
+    for (let ring = 0; ring < 60; ring++){
+      const cands = [];
+      for (let i=-ring;i<=ring;i++) for (let j=-ring;j<=ring;j++){ if (Math.max(Math.abs(i),Math.abs(j)) !== ring) continue; cands.push([sx + i*step, sy + j*step]); }
+      cands.sort((a,b) => Math.hypot(a[0]-sx,a[1]-sy) - Math.hypot(b[0]-sx,b[1]-sy));
+      for (const [x,y] of cands){ const r = tryAt(x, y, inside, gp); if (r) return r; }
+    }
+  }
+  return [sx - b.x0, sy - b.y0];
+}
+function viewCenterWorld(){ const [x,y] = s2w(svg.clientWidth/2, svg.clientHeight/2); return [clamp(x, 0, state.room.w), clamp(y, 0, state.room.h)]; }
+function addPiece(type, x, y, r){
+  const p = {id:newId('p'), type, x:0, y:0, r:r||0};
+  if (x == null){ const [cx, cy] = viewCenterWorld(); const [dx, dy] = findFreeSpot([p], cx, cy, 3); p.x = dx; p.y = dy; }
+  else { p.x = x; p.y = y; }
+  state.pieces.push(p); sel = new Set([p.id]); commit(); return p;
+}
+function addObject(kind, x, y){
+  const k = OBJ[kind]; const o = {id:newId('o'), kind, label:k.label, x:0, y:0, w:k.w, h:k.h, r:0, blocking:k.blocking};
+  if (x == null){
+    const [cx, cy] = viewCenterWorld();
+    if (kind === 'door'){ // first free spot along a wall: bottom, left, right, top
+      const W = state.room.w, H = state.room.h, ign = new Set([o.id]); let found = false;
+      const walls = [[180, t => [t, H - k.h/2], W], [270, t => [k.h/2, t], H], [90, t => [W - k.h/2, t], H], [0, t => [t, k.h/2], W]];
+      for (const [r, pos, len] of walls){
+        for (let t = 6 + k.w/2; t <= len - 6 - k.w/2 && !found; t += 6){
+          const [x, y] = pos(t); const cand = {...o, x, y, r};
+          if (!itemsCollide([polyOf(cand)], [cand], ign)){ o.x = x; o.y = y; o.r = r; found = true; }
+        }
+        if (found) break;
+      }
+      if (!found){ o.x = Math.min(W - k.w/2 - 6, 24 + k.w/2); o.y = H - k.h/2; o.r = 180; }
+    }
+    else if (kind === 'window'){ o.x = state.room.w/2; o.y = k.h/2; }
+    else if (kind === 'rug'){ o.x = cx; o.y = cy; }
+    else { const [dx, dy] = findFreeSpot([o], cx, cy); o.x = dx; o.y = dy; }
+  } else { o.x = x; o.y = y; }
+  state.objects.push(o); sel = new Set([o.id]); commit(); return o;
+}
+function addSetup(code, x0, y0){
+  const st = SETUPS.find(s => s.code === code); if (!st) return [];
+  const pcs = setupPieces(code).map(p => ({...p, id:newId('p')}));
+  if (st.addons){ const first = pcs.find(p => PIECES[p.type].cat === 'seat'); first.addons = {deepBackPillow: st.addons}; }
+  let dx, dy;
+  if (x0 == null){ const [cx, cy] = viewCenterWorld(); [dx, dy] = findFreeSpot(pcs, cx, cy, 12); } else { dx = x0; dy = y0; }
+  pcs.forEach(p => { p.x = r2(p.x + dx); p.y = r2(p.y + dy); });
+  state.pieces.push(...pcs); sel = new Set(pcs.map(p => p.id)); commit();
+  return pcs;
+}
+function rotateSel(deg){
+  const items = [...sel].map(itemById).filter(Boolean); if (!items.length) return;
+  if (items.length === 1){ const it = items[0]; it.r = normAng(it.r + deg); }
+  else {
+    const b = bboxOfPolys(items.map(polyOf)), cx = (b.x0+b.x1)/2, cy = (b.y0+b.y1)/2;
+    for (const it of items){ const [[nx, ny]] = rotatePts([[it.x, it.y]], cx, cy, deg); it.x = r2(nx); it.y = r2(ny); it.r = normAng(it.r + deg); }
+    if (deg % 90 === 0){ // keep group on the same grid after a right-angle turn
+      const nb = bboxOfPolys(items.map(polyOf)); const ddx = r2(Math.round(nb.x0) - nb.x0), ddy = r2(Math.round(nb.y0) - nb.y0);
+      items.forEach(it => { it.x = r2(it.x + ddx); it.y = r2(it.y + ddy); });
+    }
+  }
+  commit();
+}
+function deleteSel(){ if (!sel.size) return; state.pieces = state.pieces.filter(p => !sel.has(p.id)); state.objects = state.objects.filter(o => !sel.has(o.id)); sel.clear(); commit(); }
+function duplicateSel(){
+  const items = [...sel].map(itemById).filter(Boolean); if (!items.length) return;
+  const copies = items.map(it => { const c = clone(it); c.id = newId(it.kind ? 'o' : 'p'); return c; });
+  const b = bboxOfPolys(items.map(polyOf)), bw = b.x1-b.x0, bh = b.y1-b.y0;
+  const tries = [[bw+12,0],[0,bh+12],[-(bw+12),0],[0,-(bh+12)],[bw+12,bh+12],[2*(bw+12),0],[0,2*(bh+12)]];
+  let off = null;
+  const ign = new Set(copies.map(c => c.id));
+  for (const [dx,dy] of tries){ const P = copies.map(c => translatePts(polyOf(c), dx, dy)); const pb = bboxOfPolys(P);
+    if (pb.x0 >= 0 && pb.y0 >= 0 && pb.x1 <= state.room.w && pb.y1 <= state.room.h && !itemsCollide(P, copies, ign, 3)) { off = [dx,dy]; break; } }
+  if (!off) off = findFreeSpot(copies, (b.x0+b.x1)/2 + bw + 12, (b.y0+b.y1)/2, 3);
+  copies.forEach(c => { c.x = r2(c.x + off[0]); c.y = r2(c.y + off[1]); });
+  for (const c of copies) (c.kind ? state.objects : state.pieces).push(c);
+  sel = new Set(copies.map(c => c.id)); commit();
+}
+function selectGroupOf(id){ const g = A.groupOf[id]; if (g) sel = new Set(g.ids); renderAll(); }
+function selectGroupRoot(root){ const g = A.groups.find(g => g.root === root); if (g){ sel = new Set(g.ids); renderAll(); } }
+function nudge(dx, dy){ for (const id of sel){ const it = itemById(id); if (it){ it.x = r2(it.x + dx); it.y = r2(it.y + dy); } } commit(); }
+
+/* ============================ export / print ============================ */
+function exportSVGString(pxPerIn, noTitle){
+  const W = state.room.w, H = state.room.h, m = 24, titleH = 18;
+  const an = analyze();
+  let labels = '';
+  for (const g of an.groups){
+    if (!g.seats) continue;
+    const t = `${g.name} · ${fmtLen(g.w)} × ${fmtLen(g.h)} · ${g.seats} seats`;
+    const tw = t.length * 5.2 * 0.56;
+    const cx = clamp((g.bbox.x0+g.bbox.x1)/2, -m + tw/2 + 2, W + m - tw/2 - 2), y = g.bbox.y0 - 4;
+    labels += `<text x="${f(cx)}" y="${f(Math.max(y, -m+10))}" font-size="5.2" text-anchor="middle" fill="hsl(${g.hue} 40% 30%)" font-weight="700" paint-order="stroke" stroke="#fff" stroke-width="1.6">${esc(t)}</text>`;
+  }
+  const dims = `<text x="${W/2}" y="${H+14}" font-size="6.5" text-anchor="middle" fill="#374151" font-weight="600">${fmtLen(W)}</text><text x="${W+14}" y="${H/2}" font-size="6.5" text-anchor="middle" fill="#374151" font-weight="600" transform="rotate(-90 ${W+14} ${H/2})">${fmtLen(H)}</text>`;
+  const title = `<text x="${-m+6}" y="${-m-titleH+20}" font-size="9" font-weight="700" fill="#111827">${esc(state.name)}</text><text x="${W+m-6}" y="${-m-titleH+20}" font-size="5.5" text-anchor="end" fill="#6b7280">${an.total.seats} seats · ${an.total.n} pieces · 1 grid square = 1 ft</text>`;
+  const vbW = W + 2*m, vbH = H + 2*m + titleH;
+  const wpx = Math.round(vbW * pxPerIn), hpx = Math.round(vbH * pxPerIn);
+  return {w:wpx, h:hpx, svg:`<svg xmlns="http://www.w3.org/2000/svg" width="${wpx}" height="${hpx}" viewBox="${-m} ${-m-titleH} ${vbW} ${vbH}" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif"><rect x="${-m}" y="${-m-titleH}" width="${vbW}" height="${vbH}" fill="#fff"/><g transform="translate(0 0)">${worldSVG({export:true, an}).replace(/<rect x="-2000"[^>]*\/>/, '')}</g>${labels}${dims}${noTitle ? '' : title}</svg>`};
+}
+function download(name, blob){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
+const fileBase = () => (state.name || 'design').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-') || 'design';
+function exportPNG(){
+  return new Promise((resolve) => {
+    const {w, h, svg:str} = exportSVGString(5);
+    const img = new Image();
+    img.onload = () => {
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      const ctx = cv.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h); ctx.drawImage(img, 0, 0);
+      const url = cv.toDataURL('image/png'); window.__planner.lastPNG = url;
+      cv.toBlob(b => { if (b) download(fileBase() + '.png', b); toast('PNG exported'); resolve(url); }, 'image/png');
+    };
+    img.onerror = () => { toast('PNG export failed'); resolve(null); };
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(str);
+  });
+}
+function exportJSON(){
+  const data = {app:'sactionals-room-planner', version:1, exported:new Date().toISOString(), design:state};
+  const str = JSON.stringify(data, null, 1); window.__planner.lastJSON = str;
+  download(fileBase() + '.sactionals.json', new Blob([str], {type:'application/json'})); toast('JSON exported');
+}
+function importJSONText(text){
+  let d; try { d = JSON.parse(text); } catch (e) { toast('Not a valid JSON file'); return false; }
+  const data = d && d.design ? d.design : d;
+  if (!data || !Array.isArray(data.pieces)) { toast('No design found in that file'); return false; }
+  const clean = sanitize(data); clean.name = (clean.name || 'Imported') + (Object.values(store.designs).some(x => x.name === clean.name) ? ' (imported)' : '');
+  persist();
+  const id = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+  store.designs[id] = {name:clean.name, updated:Date.now(), data:clean};
+  switchDesign(id); toast('Imported “' + clean.name + '”'); return true;
+}
+function buildPrint(){
+  const an = analyze(), {svg:str} = exportSVGString(4, true);
+  let h = `<h1>${esc(state.name)}</h1><div>Room ${fmtLen(state.room.w)} × ${fmtLen(state.room.h)} · ${an.groups.filter(g=>g.seats).length} sectional(s) · ${an.total.seats} seats · ${an.total.n} pieces · printed ${new Date().toLocaleDateString()}</div>`;
+  h += str.replace('<svg ', '<svg class="plan" ');
+  const tbl = (counts, addons) => { let r = `<table><tr><th>Piece</th><th>Qty</th>${settings.showPrices?'<th>Frames</th>':''}</tr>`;
+    for (const k of Object.keys(PIECES).filter(k => counts[k])) r += `<tr><td>${esc(PIECES[k].name)}${PIECES[k].est?' (est. size)':''}</td><td>${counts[k]}</td>${settings.showPrices?`<td>${money(PIECES[k].price[settings.fill]*counts[k])}</td>`:''}</tr>`;
+    if (addons) r += `<tr><td>${ADDON.name}</td><td>${addons}</td>${settings.showPrices?`<td>${money(ADDON.price[settings.fill]*addons)}</td>`:''}</tr>`;
+    return r + '</table>'; };
+  h += `<div class="pgrid">`;
+  for (const g of an.groups) h += `<div><h2>${esc(g.name)}: ${fmtLen(g.w)} × ${fmtLen(g.h)} · ${g.seats} seats · ${g.n} pieces${settings.showPrices?` · ${money(g.price)}`:''}</h2>${tbl(g.counts, g.addons)}</div>`;
+  h += `<div><h2>Whole room: ${an.total.seats} seats · ${an.total.n} pieces${settings.showPrices?` · ${money(an.total.price)}`:''}</h2>${tbl(an.total.counts, an.total.addons)}${settings.showPrices?`<p><b>Estimated price: frames only, covers not included.</b> ${settings.fill?'Lovesoft':'Standard Foam'} list prices as of ${CATALOG_DATE}.</p>`:''}</div></div>`;
+  if (an.collisions.length || an.out.size) h += `<p>⚠ ${an.collisions.length} overlap(s), ${an.out.size} piece(s) outside the room.</p>`;
+  $('#print-area').innerHTML = h;
+}
+
+/* ============================ interaction ============================ */
+const pointers = new Map();
+let gesture = null, spaceDown = false, lastTap = {t:0, id:null}, curTab = null;
+const isMobile = () => window.matchMedia('(max-width:860px)').matches;
+function ptOf(e){ const r = svg.getBoundingClientRect(); return {x:e.clientX - r.left, y:e.clientY - r.top}; }
+function startDrag(p, extra){
+  gesture = {type:'drag', sx:p.x, sy:p.y, moved:false, base:[...sel].map(id => { const it = itemById(id); return it && {id, x:it.x, y:it.y, r:it.r, item:it}; }).filter(Boolean), ...(extra||{})};
+}
+function dragMove(p, e){
+  const g = gesture;
+  if (!g.moved && Math.hypot(p.x - g.sx, p.y - g.sy) < 4) return;
+  g.moved = true;
+  const dx = (p.x - g.sx)/view.s, dy = (p.y - g.sy)/view.s;
+  const res = computeSnap(g.base, dx, dy, {noSnap: e.altKey});
+  for (const m of g.base){ m.item.x = r2(m.x + res.dx); m.item.y = r2(m.y + res.dy); m.item.r = res.rot ? normAng(m.r + res.rot) : m.r; }
+  const b = bboxOfPolys(g.base.map(m => polyOf(m.item)));
+  dragInfo = {x0:b.x0, y0:b.y0, snapped:res.snapped, noSnap:e.altKey};
+  scheduleRender();
+}
+function cancelDrag(){ if (gesture && gesture.type === 'drag'){ for (const m of gesture.base){ m.item.x = m.x; m.item.y = m.y; m.item.r = m.r; } if (gesture.fromPalette){ removeItems(gesture.base.map(m => m.id)); } } dragInfo = null; gesture = null; scheduleRender(); }
+function removeItems(ids){ const s = new Set(ids); state.pieces = state.pieces.filter(p => !s.has(p.id)); state.objects = state.objects.filter(o => !s.has(o.id)); ids.forEach(i => sel.delete(i)); }
+svg.addEventListener('pointerdown', e => {
+  try { svg.setPointerCapture(e.pointerId); } catch (_) {}
+  const p = ptOf(e); pointers.set(e.pointerId, p);
+  if (pointers.size === 2){
+    if (gesture && gesture.type === 'drag' && gesture.moved) cancelDrag();
+    const [a, b] = [...pointers.values()]; const mid = {x:(a.x+b.x)/2, y:(a.y+b.y)/2};
+    const [wx, wy] = s2w(mid.x, mid.y); marquee = null;
+    gesture = {type:'pinch', d0:Math.hypot(a.x-b.x, a.y-b.y) || 1, s0:view.s, wx, wy}; return;
+  }
+  if (pointers.size > 2) return;
+  if (e.button === 1 || e.button === 2 || tool === 'pan' || spaceDown){ gesture = {type:'pan', sx:p.x, sy:p.y, ox:view.ox, oy:view.oy}; e.preventDefault(); return; }
+  if (e.button !== 0) return;
+  const additive = e.shiftKey || e.ctrlKey || e.metaKey || multiMode;
+  const gEl = e.target.closest && e.target.closest('[data-group]');
+  const iEl = e.target.closest && e.target.closest('[data-id]');
+  const now = performance.now();
+  if (gEl){
+    const g = A.groups.find(g => g.root === gEl.dataset.group);
+    if (g){ if (additive) g.ids.forEach(id => sel.add(id)); else sel = new Set(g.ids); }
+    renderAll(); startDrag(p); return;
+  }
+  if (iEl){
+    const id = iEl.dataset.id;
+    if (lastTap.id === id && now - lastTap.t < 350){ lastTap = {t:0, id:null}; const g = A.groupOf[id]; if (g) sel = new Set(g.ids); renderAll(); startDrag(p); return; }
+    lastTap = {t:now, id};
+    if (additive){ if (sel.has(id)){ sel.delete(id); renderAll(); gesture = null; return; } sel.add(id); }
+    else if (!sel.has(id)) sel = new Set([id]);
+    renderAll(); startDrag(p); return;
+  }
+  gesture = {type:'marquee', sx:p.x, sy:p.y, additive, base:new Set(additive ? sel : [])};
+});
+svg.addEventListener('pointermove', e => {
+  if (!pointers.has(e.pointerId)) return;
+  const p = ptOf(e); pointers.set(e.pointerId, p);
+  if (!gesture) return;
+  if (gesture.type === 'pinch' && pointers.size >= 2){
+    const [a, b] = [...pointers.values()]; const mid = {x:(a.x+b.x)/2, y:(a.y+b.y)/2};
+    const ns = clamp(gesture.s0 * Math.hypot(a.x-b.x, a.y-b.y) / gesture.d0, 0.4, 40);
+    view.s = ns; view.ox = mid.x - gesture.wx*ns; view.oy = mid.y - gesture.wy*ns; scheduleRender(); return;
+  }
+  if (gesture.type === 'pan'){ view.ox = gesture.ox + p.x - gesture.sx; view.oy = gesture.oy + p.y - gesture.sy; scheduleRender(); return; }
+  if (gesture.type === 'drag'){ dragMove(p, e); return; }
+  if (gesture.type === 'marquee'){
+    if (!marquee && Math.hypot(p.x - gesture.sx, p.y - gesture.sy) < 4) return;
+    marquee = {x0:gesture.sx, y0:gesture.sy, x1:p.x, y1:p.y};
+    const [ax, ay] = s2w(Math.min(marquee.x0, marquee.x1), Math.min(marquee.y0, marquee.y1)), [bx, by] = s2w(Math.max(marquee.x0, marquee.x1), Math.max(marquee.y0, marquee.y1));
+    const box = {x0:ax, y0:ay, x1:bx, y1:by};
+    sel = new Set(gesture.base);
+    for (const it of allItems()){ const b = bboxOf(polyOf(it)); if (it.kind === 'rug' && !(b.x0 >= ax && b.x1 <= bx && b.y0 >= ay && b.y1 <= by)) continue; if (boxNear(b, box, 0)) sel.add(it.id); }
+    scheduleRender();
+  }
+});
+function endPointer(e){
+  if (!pointers.has(e.pointerId)) return;
+  pointers.delete(e.pointerId);
+  if (!gesture) return;
+  if (gesture.type === 'pinch'){ if (pointers.size === 0) gesture = null; return; }
+  if (gesture.type === 'drag'){ const moved = gesture.moved; gesture = null; dragInfo = null; if (moved) commit(); else renderAll(); return; }
+  if (gesture.type === 'marquee'){ if (!marquee && !gesture.additive) sel.clear(); marquee = null; gesture = null; renderAll(); return; }
+  if (gesture.type === 'pan'){ gesture = null; renderAll(); return; }
+}
+svg.addEventListener('pointerup', endPointer);
+svg.addEventListener('pointercancel', e => { if (gesture && gesture.type === 'drag') cancelDrag(); endPointer(e); });
+svg.addEventListener('contextmenu', e => e.preventDefault());
+svg.addEventListener('wheel', e => {
+  e.preventDefault(); const p = ptOf(e);
+  if (!e.ctrlKey && e.shiftKey){ view.ox -= e.deltaY; scheduleRender(); return; }
+  zoomAt(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)), p.x, p.y);
+}, {passive:false});
+
+// palette: tap = add near view centre, drag = drop on plan
+let palDrag = null;
+document.addEventListener('pointerdown', e => {
+  const el = e.target.closest && e.target.closest('.pal-item'); if (!el) return;
+  palDrag = {el, type:el.dataset.piece, kind:el.dataset.obj, x:e.clientX, y:e.clientY, id:e.pointerId, touch:e.pointerType !== 'mouse', started:false};
+});
+window.addEventListener('pointermove', e => {
+  if (!palDrag || e.pointerId !== palDrag.id) return;
+  const dx = e.clientX - palDrag.x, dy = e.clientY - palDrag.y;
+  if (!palDrag.started){
+    if (Math.hypot(dx, dy) < 8) return;
+    if (palDrag.touch && Math.abs(dy) > Math.abs(dx)) { palDrag = null; return; } // vertical = scroll the palette
+    palDrag.started = true;
+    if (isMobile()) closeSheet();
+    const p = ptOf(e), [wx, wy] = s2w(p.x, p.y);
+    let it;
+    if (palDrag.type){ it = {id:newId('p'), type:palDrag.type, x:r2(wx), y:r2(wy), r:0}; state.pieces.push(it); }
+    else { const k = OBJ[palDrag.kind]; it = {id:newId('o'), kind:palDrag.kind, label:k.label, x:r2(wx), y:r2(wy), w:k.w, h:k.h, r:0, blocking:k.blocking}; state.objects.push(it); }
+    sel = new Set([it.id]); startDrag(p, {fromPalette:true}); gesture.moved = true; gesture.sx = p.x; gesture.sy = p.y;
+    renderAll();
+  }
+  if (gesture && gesture.fromPalette){ e.preventDefault(); dragMove(ptOf(e), e); }
+}, {passive:false});
+function endPal(e, cancelled){
+  if (!palDrag || e.pointerId !== palDrag.id) return;
+  const pd = palDrag; palDrag = null;
+  if (!pd.started){ if (!cancelled){ if (pd.type) addPiece(pd.type); else addObject(pd.kind); toast('Added ' + (pd.type ? PIECES[pd.type].name : OBJ[pd.kind].label)); } return; }
+  if (!gesture || !gesture.fromPalette) return;
+  const r = svg.getBoundingClientRect();
+  const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+  if (cancelled || !inside){ cancelDrag(); renderAll(); return; }
+  gesture = null; dragInfo = null; commit();
+}
+window.addEventListener('pointerup', e => endPal(e, false));
+window.addEventListener('pointercancel', e => endPal(e, true));
+
+document.addEventListener('click', e => {
+  const st = e.target.closest('[data-setup]');
+  if (st){ addSetup(st.dataset.setup); toast('Added ' + SETUPS.find(s => s.code === st.dataset.setup).name); if (isMobile()) closeSheet(); return; }
+  const el = e.target.closest('[data-act]'); if (!el || el.disabled) return;
+  const fn = ACT[el.dataset.act]; if (fn) fn(el.dataset.arg, el);
+});
+function closeSheet(){ curTab = null; applyTabs(); }
+function applyTabs(){
+  document.querySelectorAll('.psec').forEach(s => s.classList.toggle('show', s.dataset.tab === curTab));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('open', !!p.querySelector('.psec.show')));
+  document.querySelectorAll('#mobnav button').forEach(b => b.classList.toggle('on', b.dataset.arg === curTab));
+}
+function newDesignId(){ return 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+const ACT = {
+  undo, redo,
+  rot: a => rotateSel(+a), dup: duplicateSel, del: deleteSel,
+  group: () => { const first = [...sel].map(itemById).find(it => it && !it.kind); if (first){ const g = A.groupOf[first.id]; const ids = new Set(sel); g.ids.forEach(i => ids.add(i)); sel = ids; renderAll(); } },
+  tool: a => { tool = a; renderPanels(); }, multi: () => { multiMode = !multiMode; renderPanels(); },
+  zoomIn: () => zoomAt(1.25, svg.clientWidth/2, svg.clientHeight/2), zoomOut: () => zoomAt(0.8, svg.clientWidth/2, svg.clientHeight/2),
+  fit: () => { fitView(); renderPlan(); },
+  clearance: () => { settings.clearance = !settings.clearance; persist(); renderAll(); },
+  prices: () => { settings.showPrices = !settings.showPrices; persist(); renderAll(); },
+  png: () => exportPNG(), print: () => { buildPrint(); window.print(); },
+  newDesign: () => { const n = Object.keys(store.designs).length + 1; persist(); const id = newDesignId(); const d = newDesignData('Design ' + n); store.designs[id] = {name:d.name, updated:Date.now(), data:d}; switchDesign(id); toast('New design'); },
+  dupDesign: () => { persist(); const id = newDesignId(); const d = clone(state); d.name = state.name + ' copy'; store.designs[id] = {name:d.name, updated:Date.now(), data:d}; switchDesign(id); toast('Duplicated design'); },
+  delDesign: () => {
+    if (!confirm(`Delete design “${state.name}”? This can't be undone.`)) return;
+    delete store.designs[store.currentId];
+    let ids = Object.keys(store.designs).sort((a,b) => store.designs[b].updated - store.designs[a].updated);
+    if (!ids.length){ const id = newDesignId(); store.designs[id] = {name:'My Living Room', updated:Date.now(), data:newDesignData()}; ids = [id]; }
+    store.currentId = ids[0]; state = sanitize(store.designs[ids[0]].data); sel.clear(); resetHistory(); persist(); fitView(); renderAll();
+  },
+  exportJSON, importJSON: () => $('#importFile').click(),
+  tab: a => { curTab = curTab === a ? null : a; applyTabs(); },
+  selGroup: a => selectGroupRoot(a),
+  addon: a => { const p = itemById([...sel][0]); if (!p || p.kind) return; const n = Math.max(0, ((p.addons && p.addons.deepBackPillow) || 0) + (+a)); if (n) p.addons = {deepBackPillow:n}; else delete p.addons; commit(); }
+};
+$('#importFile').addEventListener('change', e => { const file = e.target.files[0]; if (!file) return; const rd = new FileReader(); rd.onload = () => importJSONText(rd.result); rd.readAsText(file); e.target.value = ''; });
+$('#designSel').addEventListener('change', e => switchDesign(e.target.value));
+let nameT = null;
+$('#designName').addEventListener('input', e => { state.name = e.target.value || 'Untitled'; $('#dname').textContent = state.name; clearTimeout(nameT); nameT = setTimeout(() => commit(), 400); });
+function roomChange(){
+  const v = (id) => parseFloat($(id).value) || 0;
+  const w = clamp(v('#roomWft')*12 + v('#roomWin'), 48, 1200), h = clamp(v('#roomHft')*12 + v('#roomHin'), 48, 1200);
+  state.room = {w:r2(w), h:r2(h)}; commit(); fitView(); renderPlan();
+}
+['#roomWft','#roomWin','#roomHft','#roomHin'].forEach(id => $(id).addEventListener('change', roomChange));
+$('#gridSel').addEventListener('change', e => { settings.grid = +e.target.value; persist(); renderAll(); });
+document.addEventListener('change', e => {
+  const t = e.target, one = itemById([...sel][0]);
+  if (t.id === 'pricesChk'){ settings.showPrices = t.checked; persist(); renderAll(); }
+  else if (t.id === 'fillSel'){ settings.fill = +t.value; persist(); buildStaticPanels(); renderAll(); }
+  else if (t.id === 'clearChk'){ settings.clearance = t.checked; persist(); renderAll(); }
+  else if (!one) return;
+  else if (t.id === 'typeSel'){ one.type = t.value; if (PIECES[one.type].cat !== 'seat') delete one.addons; commit(); }
+  else if (t.id === 'rotIn'){ one.r = normAng(parseFloat(t.value) || 0); commit(); }
+  else if (t.id === 'objLabel'){ one.label = t.value; commit(); }
+  else if (t.id === 'objKind'){ one.kind = t.value; one.blocking = OBJ[t.value].blocking; if (!one.label || Object.values(OBJ).some(k => k.label === one.label)) one.label = OBJ[t.value].label; commit(); }
+  else if (t.id === 'objW'){ one.w = clamp(parseFloat(t.value) || 1, 1, 1200); commit(); }
+  else if (t.id === 'objH'){ one.h = clamp(parseFloat(t.value) || 1, 1, 1200); commit(); }
+  else if (t.id === 'objBlock'){ one.blocking = t.checked; commit(); }
+});
+document.addEventListener('keydown', e => {
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
+  const k = e.key, mod = e.ctrlKey || e.metaKey;
+  if (k === ' '){ spaceDown = true; e.preventDefault(); return; }
+  if (mod && (k === 'z' || k === 'Z')){ e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+  if (mod && (k === 'y' || k === 'Y')){ e.preventDefault(); redo(); return; }
+  if (mod && (k === 'd' || k === 'D')){ e.preventDefault(); duplicateSel(); return; }
+  if (mod && (k === 'a' || k === 'A')){ e.preventDefault(); sel = new Set(allItems().map(i => i.id)); renderAll(); return; }
+  if (mod) return;
+  if (k === 'Delete' || k === 'Backspace'){ e.preventDefault(); deleteSel(); }
+  else if (k === 'r' || k === 'R') rotateSel(e.shiftKey ? -90 : 90);
+  else if (k === 'e' || k === 'E') rotateSel(e.shiftKey ? -45 : 45);
+  else if (k === 't' || k === 'T') rotateSel(e.shiftKey ? -22.5 : 22.5);
+  else if (k === 'g' || k === 'G') ACT.group();
+  else if (k === 'f' || k === 'F') ACT.fit();
+  else if (k === 'Escape'){ sel.clear(); if (gesture && gesture.type === 'drag') cancelDrag(); renderAll(); }
+  else if (k === '+' || k === '=') ACT.zoomIn();
+  else if (k === '-' || k === '_') ACT.zoomOut();
+  else if (k.startsWith('Arrow') && sel.size){ e.preventDefault(); const st = e.shiftKey ? 6 : 1; nudge(k === 'ArrowLeft' ? -st : k === 'ArrowRight' ? st : 0, k === 'ArrowUp' ? -st : k === 'ArrowDown' ? st : 0); }
+});
+document.addEventListener('keyup', e => { if (e.key === ' ') spaceDown = false; });
+window.addEventListener('beforeprint', buildPrint);
+new ResizeObserver(() => { if (!view._init){ view._init = true; fitView(); } renderPlan(); }).observe($('#stage'));
+
+/* ============================ init ============================ */
+store = loadStore();
+settings = {...DEFAULT_SETTINGS, ...(store.settings || {})};
+if (!store.designs[store.currentId]) store.currentId = Object.keys(store.designs)[0];
+state = sanitize(store.designs[store.currentId].data);
+resetHistory();
+buildStaticPanels();
+fitView();
+renderAll();
+persist();
+window.__planner = {
+  get state(){ return state; }, get sel(){ return sel; }, get view(){ return view; }, get settings(){ return settings; }, get store(){ return store; },
+  get hist(){ return {len:hist.length, idx:histIdx}; },
+  analyze, addPiece, addObject, addSetup, commit, undo, redo, rotateSel, duplicateSel, deleteSel, w2s, s2w, exportPNG, exportJSON, importJSONText,
+  switchDesign, setupPieces, SETUPS, PIECES, EST, computeSnap, fitView, renderAll, buildPrint, polyOf, polyDist, overlapDepth, exportSVGString,
+  select(ids){ sel = new Set(ids); renderAll(); }, ACT
+};
+})();
+</script>
+</body>
+</html>
